@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import javax.transaction.Transactional;
+import java.io.InputStream;
 
 @Transactional
 @Controller
@@ -31,5 +32,19 @@ public class TemplateService {
 
         group.addTemplate(t);
         return groupRepository.save(group);
+    }
+
+    public void addContent(long templateId, InputStream is) {
+        Template t=repository.findOne(templateId);
+        t.saveContent(is);
+        repository.save(t);
+    }
+    public void addContent(Template t, InputStream is) {
+        t.saveContent(is);
+        repository.save(t);
+    }
+
+    public void updateTemplate(Template t) {
+        repository.save(t);
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.io.ByteArrayInputStream;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,7 @@ public class TemplateServiceIntegrationTest {
 
         Optional<Template> opt=repository.findByLanguage("de").stream().findFirst();
         assertThat(opt.isPresent()).isTrue();
+        service.addContent(opt.get(),new ByteArrayInputStream("junit".getBytes()));
         service.requestApproval(opt.get().getId());
     }
 
@@ -43,5 +45,12 @@ public class TemplateServiceIntegrationTest {
         Template t=new Template("de");
         TemplateGroup group = service.addTemplate(1, "de", "junit", t);
         assertThat(group).isNotNull();
+    }
+
+    @Test
+    public void testDetachedApproval() {
+        Template t = repository.save(new Template("de"));
+        t.saveContent(new ByteArrayInputStream("junit".getBytes())).requestApproval().approve();
+        service.updateTemplate(t);
     }
 }

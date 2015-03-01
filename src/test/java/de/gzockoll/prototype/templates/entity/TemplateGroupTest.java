@@ -21,7 +21,7 @@ public class TemplateGroupTest {
         group.addTemplate(de);
 
         assertThat(group.getActiveTemplate().isPresent()).isFalse();
-        de.requestApproval().approve();
+        de.saveContent("Test").requestApproval().approve();
         group.activate(de);
         Optional<Template> option = group.getActiveTemplate();
         assertThat(option.isPresent()).isTrue();

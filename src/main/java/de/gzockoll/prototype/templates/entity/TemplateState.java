@@ -2,6 +2,8 @@ package de.gzockoll.prototype.templates.entity;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.InputStream;
+
 @Slf4j
 public enum TemplateState {
     EDITABLE{
@@ -9,17 +11,18 @@ public enum TemplateState {
         public TemplateState requestApproval() {
             return transitionTo(READY_FOR_APPROVAL);
         }
+
+        public TemplateState saveContent(Template t, InputStream is) {
+            t.setContent(is);
+            return this;
+        }
+
     }, READY_FOR_APPROVAL{
         @Override
         public TemplateState approve() {
             return transitionTo(APPROVED);
         }
-    },APPROVED{
-        @Override
-        public TemplateState edit() {
-            return transitionTo(EDITABLE);
-        }
-    };
+    },APPROVED;
 
     public TemplateState requestApproval() {
         throw new IllegalStateException(getErrorMessage());
@@ -29,7 +32,7 @@ public enum TemplateState {
         throw new IllegalStateException(getErrorMessage());
     }
 
-    public TemplateState edit() {
+    public TemplateState saveContent(Template t, InputStream is) {
         throw new IllegalStateException(getErrorMessage());
     }
 
@@ -52,4 +55,5 @@ public enum TemplateState {
         }
         return newState;
     }
+
 }
