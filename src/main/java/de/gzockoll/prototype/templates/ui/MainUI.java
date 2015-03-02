@@ -3,14 +3,19 @@ package de.gzockoll.prototype.templates.ui;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.Property;
 import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
+import org.springframework.util.StringUtils;
 import org.vaadin.spring.annotation.VaadinUI;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 @VaadinUI
 @Theme("valo")
@@ -50,6 +55,48 @@ public class MainUI extends UI {
         root.setWidth("100%");
 
         root.addMenu(buildMenu());
+
+        navigator = new Navigator(this, viewDisplay);
+        navigator.addView("common", CommonParts.class);
+
+        final String f = Page.getCurrent().getUriFragment();
+        if (StringUtils.isEmpty(f)) {
+            navigator.navigateTo("common");
+        }
+        navigator.setErrorView(CommonParts.class);
+
+        navigator.addViewChangeListener(new ViewChangeListener() {
+
+            @Override
+            public boolean beforeViewChange(final ViewChangeEvent event) {
+                return true;
+            }
+
+            @Override
+            public void afterViewChange(final ViewChangeEvent event) {
+                for (final Iterator<Component> it = menuItemsLayout.iterator(); it
+                        .hasNext();) {
+                    it.next().removeStyleName("selected");
+                }
+                for (final Map.Entry<String, String> item : menuItems.entrySet()) {
+                    if (event.getViewName().equals(item.getKey())) {
+                        for (final Iterator<Component> it = menuItemsLayout
+                                .iterator(); it.hasNext();) {
+                            final Component c = it.next();
+                            if (c.getCaption() != null
+                                    && c.getCaption().startsWith(
+                                    item.getValue())) {
+                                c.addStyleName("selected");
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                menu.removeStyleName("valo-menu-visible");
+            }
+        });
+
         viewDisplay.addComponent(getContentComponents());
     }
 
