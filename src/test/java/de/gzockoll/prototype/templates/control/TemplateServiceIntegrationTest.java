@@ -1,9 +1,8 @@
 package de.gzockoll.prototype.templates.control;
 
 import de.gzockoll.prototype.templates.TemplatesApplication;
-import de.gzockoll.prototype.templates.entity.Template;
-import de.gzockoll.prototype.templates.entity.TemplateGroup;
-import de.gzockoll.prototype.templates.entity.TemplateRepository;
+import de.gzockoll.prototype.templates.entity.*;
+import org.apache.tika.Tika;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +31,9 @@ public class TemplateServiceIntegrationTest {
 
     @Autowired
     private TemplateRepository repository;
+
+    @Autowired
+    private AssetRepository assets;
 
     @Test
     public void testRequestApproval() throws Exception {
@@ -52,5 +57,14 @@ public class TemplateServiceIntegrationTest {
         Template t = repository.save(new Template("de"));
         t.saveContent(new ByteArrayInputStream("junit".getBytes())).requestApproval().approve();
         service.updateTemplate(t);
+    }
+
+    @Test
+    public void testPreview() throws IOException {
+        Asset a=new Asset(new ByteArrayInputStream(Files.readAllBytes(Paths.get("camel/vorlage/template.xsl"))));
+        assets.save(a);
+        byte[] result = service.preview(a);
+        Tika tika=new Tika();
+        assertThat(tika.detect(result)).isEqualTo("application/pdf");
     }
 }

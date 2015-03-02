@@ -13,7 +13,7 @@ public enum TemplateState {
         }
 
         public TemplateState saveContent(Template t, InputStream is) {
-            t.setContent(is);
+            t.setTransform(is);
             return this;
         }
 
