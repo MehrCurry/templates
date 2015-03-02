@@ -9,6 +9,7 @@ public class PdfRouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         from("direct:xml2pdf").
                 recipientList(simple("xslt:http://localhost:9090/assets/raw/${header.templateId}?contentCache=false")).
-                to("fop:application/pdf");
+                to("fop:application/pdf").to("overlayProcessor");
+
     }
 }

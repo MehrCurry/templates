@@ -15,7 +15,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TemplatesApplication.class)   // 2
 @WebAppConfiguration   // 3
-@IntegrationTest("server.port:0")   // 4
+@IntegrationTest("server.port:9090")
 public class TemplateServiceIntegrationTest {
 
     @Autowired
@@ -35,15 +34,9 @@ public class TemplateServiceIntegrationTest {
     @Autowired
     private AssetRepository assets;
 
-    @Test
-    public void testRequestApproval() throws Exception {
-        repository.save(new Template("de"));
+    @Autowired
+    private AssetController assetController;
 
-        Optional<Template> opt=repository.findByLanguage("de").stream().findFirst();
-        assertThat(opt.isPresent()).isTrue();
-        service.addContent(opt.get(),new ByteArrayInputStream("junit".getBytes()));
-        service.requestApproval(opt.get().getId());
-    }
 
     @Test
     public void testGroup() {
@@ -55,15 +48,20 @@ public class TemplateServiceIntegrationTest {
     @Test
     public void testDetachedApproval() {
         Template t = repository.save(new Template("de"));
-        t.saveContent(new ByteArrayInputStream("junit".getBytes())).requestApproval().approve();
+        final Asset a = new Asset(new ByteArrayInputStream("junit".getBytes()));
+        assets.save(a);
+        t.assignTransform(a).assignStationary(a).requestApproval().approve();
         service.updateTemplate(t);
     }
 
     @Test
     public void testPreview() throws IOException {
-        Asset a=new Asset(new ByteArrayInputStream(Files.readAllBytes(Paths.get("camel/vorlage/template.xsl"))));
-        assets.save(a);
-        byte[] result = service.preview(a);
+        Asset a1=new Asset(new ByteArrayInputStream(Files.readAllBytes(Paths.get("camel/vorlage/template.xsl"))));
+        assets.save(a1);
+        Asset a2 = new Asset(new ByteArrayInputStream(Files.readAllBytes(Paths.get("camel/vorlage/stationery.pdf"))));
+        assets.save(a2);
+        Template t=new Template("de").assignTransform(a1).assignStationary(a2).requestApproval().approve();
+        byte[] result = service.preview(t);
         Tika tika=new Tika();
         assertThat(tika.detect(result)).isEqualTo("application/pdf");
     }

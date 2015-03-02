@@ -1,25 +1,38 @@
 package de.gzockoll.prototype.templates.camel;
 
 import com.google.common.io.ByteStreams;
+import de.gzockoll.prototype.templates.entity.AssetRepository;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.pdfbox.multipdf.Overlay;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.Collections;
 
+@Component
 public class OverlayProcessor implements Processor {
+
+    @Autowired
+    private AssetRepository assetRepository;
     @Override
     public void process(Exchange exchange) throws Exception {
-        String inputFileName=exchange.getIn().getHeader("CamelFileAbsolutePath",String.class);
-        String overlayFileName=exchange.getIn().getHeader("Overlay", String.class);
+        ByteArrayOutputStream data=exchange.getIn().getBody(ByteArrayOutputStream.class);
+
+        PDDocument inputDocument=PDDocument.load(new ByteArrayInputStream(data.toByteArray()));
+        final byte[] stationeryData = assetRepository.findOne((Long) exchange.getIn().getHeader("stationeryId")).getData();
+        PDDocument stationery=PDDocument.load(new ByteArrayInputStream(stationeryData));
+
         File out= File.createTempFile("out", ".pdf");
+
         Overlay overlay=new Overlay();
-        overlay.setInputFile(inputFileName);
-        overlay.setDefaultOverlayFile(overlayFileName);
+        overlay.setInputPDF(inputDocument);
+        overlay.setDefaultOverlayPDF(stationery);
         overlay.setOutputFile(out.getAbsolutePath());
         overlay.overlay(Collections.EMPTY_MAP);
+
         byte[] bytes= ByteStreams.toByteArray(new FileInputStream(out));
         out.delete();
         exchange.getIn().setBody(bytes);

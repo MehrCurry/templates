@@ -2,16 +2,15 @@ package de.gzockoll.prototype.templates.entity;
 
 import com.google.gwt.thirdparty.guava.common.base.Preconditions;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-@Entity @EqualsAndHashCode(exclude = "id") @ToString
+@Entity @EqualsAndHashCode(exclude = "id") @ToString @Getter
 public class Template extends AbstractEntity {
 
     @NotNull
@@ -57,25 +56,25 @@ public class Template extends AbstractEntity {
         return language;
     }
 
-    public Template saveContent(InputStream is) {
-        Preconditions.checkNotNull(is);
-        state=state.saveContent(this,is);
+    public Template assignTransform(Asset a) {
+        Preconditions.checkNotNull(a);
+        state=state.assignTransform(this, a);
         return this;
     }
 
-    void setTransform(InputStream input) {
-        final Asset asset = new Asset(input);
-        Preconditions.checkArgument(asset.getMimeType().equals("application/xml"),"Transformer script must be a xsl file");
-        transform= asset;
+    public Template assignStationary(Asset a) {
+        Preconditions.checkNotNull(a);
+        state=state.assignStationary(this, a);
+        return this;
     }
 
-    void setStationary(InputStream input) {
-        final Asset asset = new Asset(input);
-        Preconditions.checkArgument(asset.getMimeType().equals("application/pdf"),"Stationary must be a pdf file");
-        stationary=new Asset(input);
+    void setTransform(Asset a) {
+        Preconditions.checkNotNull(a);
+        this.transform=a;
     }
 
-    public Template saveContent(String s) {
-        return saveContent(new ByteArrayInputStream(s.getBytes()));
+    void setStationary(Asset a) {
+        Preconditions.checkNotNull(a);
+        this.stationary=a;
     }
 }

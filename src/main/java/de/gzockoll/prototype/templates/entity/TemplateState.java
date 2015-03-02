@@ -12,11 +12,17 @@ public enum TemplateState {
             return transitionTo(READY_FOR_APPROVAL);
         }
 
-        public TemplateState saveContent(Template t, InputStream is) {
-            t.setTransform(is);
+        @Override
+        public TemplateState assignTransform(Template template, Asset a) {
+            template.setTransform(a);
             return this;
         }
 
+        @Override
+        public TemplateState assignStationary(Template template, Asset a) {
+            template.setStationary(a);
+            return this;
+        }
     }, READY_FOR_APPROVAL{
         @Override
         public TemplateState approve() {
@@ -56,4 +62,7 @@ public enum TemplateState {
         return newState;
     }
 
+    public TemplateState assignTransform(Template template, Asset a) { throw new IllegalStateException(getErrorMessage()); }
+
+    public TemplateState assignStationary(Template template, Asset a) { throw new IllegalStateException(getErrorMessage()); }
 }
