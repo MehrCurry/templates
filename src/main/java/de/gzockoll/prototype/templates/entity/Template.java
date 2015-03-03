@@ -23,7 +23,7 @@ public class Template extends AbstractEntity {
     @OneToOne
     private Asset stationery;
 
-    private Template() {
+    public Template() {
     }
 
     public Template(@Size(min = 2, max = 2) String language) {

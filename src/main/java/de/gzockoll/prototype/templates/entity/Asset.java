@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 @Entity
 @EqualsAndHashCode @ToString @Getter
 public class Asset extends AbstractEntity {
+    private static final Tika TIKA =new Tika();
+
     @NotNull
     private String mimeType;
     @NotNull
@@ -25,19 +27,18 @@ public class Asset extends AbstractEntity {
     private byte[] data;
 
     private String filename;
-    private transient Tika tika=new Tika();
 
-    private Asset() {}
+    public Asset() {}
 
     public Asset (byte[] data,String filename) {
         this.data=data;
-        this.mimeType=tika.detect(data);
+        this.mimeType= TIKA.detect(data);
         this.filename=filename;
     }
     public Asset(InputStream is, String filename) {
         try {
             this.data=ByteStreams.toByteArray(is);
-            this.mimeType=tika.detect(data);
+            this.mimeType= TIKA.detect(data);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -47,7 +48,7 @@ public class Asset extends AbstractEntity {
         try {
             final Path aPath = Paths.get(path);
             this.data= Files.readAllBytes(aPath);
-            this.mimeType=tika.detect(data);
+            this.mimeType= TIKA.detect(data);
             this.filename=aPath.getFileName().toString();
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,6 +56,6 @@ public class Asset extends AbstractEntity {
     }
 
     public long getSize() {
-        return data.length;
+        return data != null ? data.length : 0L;
     }
 }

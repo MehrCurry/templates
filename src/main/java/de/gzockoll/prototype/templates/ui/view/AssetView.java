@@ -1,6 +1,7 @@
 package de.gzockoll.prototype.templates.ui.view;
 
 import com.vaadin.ui.*;
+import de.gzockoll.prototype.templates.entity.Asset;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ public class AssetView extends CustomComponent {
     Table assetTable=new Table();
     Button preview=new Button("Preview");
     Label time=new Label();
+    CRUDForm<Asset> crudForm=new CRUDForm<>(Asset.class);
 
     @PostConstruct
     public void init() {
@@ -33,6 +35,8 @@ public class AssetView extends CustomComponent {
         });
 
         layout.addComponent(assetTable);
+        layout.addComponent(crudForm);
+
         setCompositionRoot(layout);
     }
 }

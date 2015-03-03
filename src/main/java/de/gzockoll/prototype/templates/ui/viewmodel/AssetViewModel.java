@@ -68,6 +68,7 @@ public class AssetViewModel {
                     }
                 }
         );
+        assetView.getCrudForm().setBeanItemContainerDataSource(assetContainer);
     }
     public void showPDF(byte[] data) {
         Window window = new Window();

@@ -9,7 +9,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
-import de.gzockoll.prototype.templates.ui.view.TemplateView;
+import de.gzockoll.prototype.templates.ui.viewmodel.TemplateViewModel;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -30,7 +30,7 @@ public class MainUI extends UI {
     private CommonParts commonParts;
 
     @Autowired
-    private TemplateView templateView;
+    private TemplateViewModel templateViewModel;
 
     ValoMenuLayout root = new ValoMenuLayout();
     ComponentContainer viewDisplay = root.getContentContainer();
@@ -70,7 +70,7 @@ public class MainUI extends UI {
 
         navigator = new Navigator(this, viewDisplay);
         navigator.addView("assets", commonParts);
-        navigator.addView("templates", templateView);
+        navigator.addView("templates", templateViewModel.getView());
 
         final String f = Page.getCurrent().getUriFragment();
         if (StringUtils.isEmpty(f)) {

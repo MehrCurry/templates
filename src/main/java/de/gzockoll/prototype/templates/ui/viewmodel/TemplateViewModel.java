@@ -2,7 +2,7 @@ package de.gzockoll.prototype.templates.ui.viewmodel;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.CustomComponent;
+import com.vaadin.navigator.View;
 import com.vaadin.ui.Table;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Template;
@@ -10,10 +10,12 @@ import de.gzockoll.prototype.templates.entity.TemplateRepository;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.vaadin.spring.annotation.VaadinUIScope;
 
 import javax.annotation.PostConstruct;
 
+@Component
 @VaadinUIScope
 @Slf4j
 public class TemplateViewModel {
@@ -52,7 +54,7 @@ public class TemplateViewModel {
         view.getSaveButton().addClickListener(clickEvent -> log.debug("Save!"));
     }
 
-    public CustomComponent getView() {
+    public View getView() {
         return view;
     }
 }
