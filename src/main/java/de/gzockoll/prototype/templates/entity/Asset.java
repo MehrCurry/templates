@@ -20,10 +20,15 @@ public class Asset extends AbstractEntity {
     @NotNull
     @Lob
     private byte[] data;
+    private transient Tika tika=new Tika();
 
     private Asset() {}
+
+    public Asset (byte[] data) {
+        this.data=data;
+        this.mimeType=tika.detect(data);
+    }
     public Asset(InputStream is) {
-        Tika tika=new Tika();
         try {
             this.data=ByteStreams.toByteArray(is);
             this.mimeType=tika.detect(data);

@@ -71,4 +71,9 @@ public class AssetController {
         ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(asset.getData(), headers, HttpStatus.OK);
         return response;
     }
+
+    public void save(Asset a) {
+        Preconditions.checkNotNull(a);
+        repository.save(a);
+    }
 }

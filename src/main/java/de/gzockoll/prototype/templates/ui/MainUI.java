@@ -1,5 +1,6 @@
 package de.gzockoll.prototype.templates.ui;
 
+import com.google.gwt.thirdparty.guava.common.base.Preconditions;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.Property;
 import com.vaadin.navigator.Navigator;
@@ -9,6 +10,8 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
+import de.gzockoll.prototype.templates.entity.AssetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.annotation.VaadinUI;
 
@@ -20,6 +23,12 @@ import java.util.Map;
 @VaadinUI
 @Theme("valo")
 public class MainUI extends UI {
+
+    @Autowired
+    private AssetRepository assetRepository;
+
+    @Autowired
+    private CommonParts commonParts;
 
     ValoMenuLayout root = new ValoMenuLayout();
     ComponentContainer viewDisplay = root.getContentContainer();
@@ -34,6 +43,7 @@ public class MainUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
+        Preconditions.checkState(assetRepository!=null);
         if (request.getParameter("test") != null) {
             testMode = true;
 
@@ -57,13 +67,13 @@ public class MainUI extends UI {
         root.addMenu(buildMenu());
 
         navigator = new Navigator(this, viewDisplay);
-        navigator.addView("common", CommonParts.class);
+        navigator.addView("common", commonParts);
 
         final String f = Page.getCurrent().getUriFragment();
         if (StringUtils.isEmpty(f)) {
             navigator.navigateTo("common");
         }
-        navigator.setErrorView(CommonParts.class);
+        navigator.setErrorView(commonParts);
 
         navigator.addViewChangeListener(new ViewChangeListener() {
 

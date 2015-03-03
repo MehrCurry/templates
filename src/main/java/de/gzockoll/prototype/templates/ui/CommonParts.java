@@ -7,12 +7,22 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
+import de.gzockoll.prototype.templates.control.AssetController;
+import de.gzockoll.prototype.templates.entity.Asset;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 
+@Component
+@Scope("prototype")
 @Slf4j
 public class CommonParts extends VerticalLayout implements View,Upload.Receiver {
+
+    @Autowired
+    private AssetController controller;
 
     private ByteArrayOutputStream data;
 
@@ -25,9 +35,11 @@ public class CommonParts extends VerticalLayout implements View,Upload.Receiver 
         addComponent(h1);
 
         Upload upload = new Upload("Upload it here", this);
-        upload.addFinishedListener(e ->
-                log.debug("Finished" + e));
-        addComponent(upload);
+        upload.addFinishedListener(e -> {
+                    Asset a = new Asset(data.toByteArray());
+                    controller.save(a);
+                });
+                addComponent(upload);
     }
 
     @Override
