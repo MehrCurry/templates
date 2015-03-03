@@ -1,16 +1,16 @@
 package de.gzockoll.prototype.templates.ui.view;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
 import com.vaadin.ui.*;
+import de.gzockoll.prototype.templates.entity.AbstractEntity;
 
 import static com.vaadin.event.Action.Handler;
 
-public class CRUDForm<T> extends CustomComponent {
+public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
     private static final int MAX_PAGE_LENGTH = 20;
     private final Class<T> clazz;
     private VerticalLayout layout=new VerticalLayout();
@@ -46,7 +46,7 @@ public class CRUDForm<T> extends CustomComponent {
         table.setSelectable(true);
         table.addItemClickListener(itemClickEvent -> {
             if (itemClickEvent.isDoubleClick()) {
-                openDetailWindow(itemClickEvent.getItem(),"Edit " + clazz.getSimpleName());
+                openDetailWindow((BeanItem) itemClickEvent.getItem(),"Edit " + clazz.getSimpleName());
             }
         });
         table.addActionHandler(new Handler() {
@@ -76,7 +76,7 @@ public class CRUDForm<T> extends CustomComponent {
         table.markAsDirtyRecursive();
     }
 
-    private void openDetailWindow(Item item, String s) {
+    private void openDetailWindow(BeanItem item, String s) {
         Window window=new Window();
         window.setModal(true);
 
@@ -87,9 +87,12 @@ public class CRUDForm<T> extends CustomComponent {
         fieldGroup = new BeanFieldGroup<T>(clazz);
         fieldGroup.setItemDataSource(item);
 
-        fieldGroup.getUnboundPropertyIds().stream().forEach(e ->
-            layout.addComponent(fieldGroup.buildAndBind(e))
-        );
+        fieldGroup.getUnboundPropertyIds().stream().forEach(e -> {
+            T bean = (T) item.getBean();
+            if (!bean.getHiddenAttributes().contains(e)) {
+                layout.addComponent(fieldGroup.buildAndBind(e));
+            }
+        });
         layout.addComponent(createOkButton(window));
         getUI().addWindow(window);
     }
