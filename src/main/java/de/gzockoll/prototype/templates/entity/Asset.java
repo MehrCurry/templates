@@ -53,4 +53,8 @@ public class Asset extends AbstractEntity {
             e.printStackTrace();
         }
     }
+
+    public long getSize() {
+        return data.length;
+    }
 }

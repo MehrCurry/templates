@@ -7,25 +7,31 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import de.gzockoll.prototype.templates.control.AssetController;
 import de.gzockoll.prototype.templates.entity.Asset;
+import de.gzockoll.prototype.templates.ui.viewmodel.AssetViewModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import org.vaadin.spring.annotation.VaadinUIScope;
+import org.vaadin.spring.navigator.annotation.VaadinView;
 
+import javax.annotation.PostConstruct;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
-@Component
-@Scope("prototype")
+@VaadinUIScope
 @Slf4j
+@VaadinView(name = "commonParts")
 public class CommonParts extends VerticalLayout implements View,Upload.Receiver {
 
     @Autowired
     private AssetController controller;
 
+    @Autowired
+    private AssetViewModel viewModel;
+
     private ByteArrayOutputStream data;
 
-    public CommonParts() {
+    @PostConstruct
+    public void init() {
         setMargin(true);
         addStyleName("content-common");
 
@@ -37,8 +43,10 @@ public class CommonParts extends VerticalLayout implements View,Upload.Receiver 
         upload.addFinishedListener(e -> {
                     Asset a = new Asset(data.toByteArray(),e.getFilename());
                     controller.save(a);
+                    viewModel.refreshTable();
                 });
-                addComponent(upload);
+        addComponent(upload);
+        addComponent(viewModel.getView());
     }
 
     @Override

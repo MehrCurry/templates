@@ -1,5 +1,7 @@
 package de.gzockoll.prototype.templates.entity;
 
+import lombok.Getter;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -7,6 +9,7 @@ import javax.persistence.Version;
 import java.util.Date;
 
 @MappedSuperclass
+@Getter
 public abstract class AbstractEntity {
     @Id
     @GeneratedValue
@@ -15,11 +18,6 @@ public abstract class AbstractEntity {
     @Version
     private long version;
 
-    private Date createdAt = new Date();
-
-    public Long getId() {
-        return id;
-    }
-
+    final private Date createdAt = new Date();
 
 }
