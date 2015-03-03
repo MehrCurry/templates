@@ -93,7 +93,7 @@ public class AssetViewModel {
     }
 
     private void reloadTable() {
-        // assetContainer.refresh();
+        // templateContainer.refresh();
         assetView.getAssetTable().setCurrentPageFirstItemId(0);
     }
 

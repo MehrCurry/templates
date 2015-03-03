@@ -20,7 +20,7 @@ public enum TemplateState {
 
         @Override
         public TemplateState assignStationary(Template template, Asset a) {
-            template.setStationary(a);
+            template.setStationery(a);
             return this;
         }
     }, READY_FOR_APPROVAL{

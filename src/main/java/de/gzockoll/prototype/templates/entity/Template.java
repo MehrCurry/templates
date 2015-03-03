@@ -21,7 +21,7 @@ public class Template extends AbstractEntity {
     private Asset transform;
 
     @OneToOne
-    private Asset stationary;
+    private Asset stationery;
 
     private Template() {
     }
@@ -39,7 +39,7 @@ public class Template extends AbstractEntity {
     }
 
     private boolean assetsPresent() {
-        return transform!=null && stationary!=null;
+        return transform!=null && stationery !=null;
     }
 
     public boolean isApproved() {
@@ -73,8 +73,8 @@ public class Template extends AbstractEntity {
         this.transform=a;
     }
 
-    void setStationary(Asset a) {
+    void setStationery(Asset a) {
         Preconditions.checkNotNull(a);
-        this.stationary=a;
+        this.stationery =a;
     }
 }
