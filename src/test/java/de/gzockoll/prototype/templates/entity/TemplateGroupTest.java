@@ -15,7 +15,8 @@ public class TemplateGroupTest {
 
     @Test
     public void testActivate() throws Exception {
-        Template de=new Template(Locale.GERMAN.getLanguage());
+        Asset a=new Asset("JUnit".getBytes(),"bla.txt");
+        Template de=new Template(Locale.GERMAN.getLanguage()).assignTransform(a).assignStationary(a).requestApproval().approve();
 
         TemplateGroup group=new TemplateGroup(1,"de","junit");
         group.addTemplate(de);

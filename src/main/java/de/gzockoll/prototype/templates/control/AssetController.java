@@ -43,7 +43,7 @@ public class AssetController {
         Asset asset = null;
         try {
             int sizeUpload = file.getBytes().length;
-            asset = new Asset(file.getInputStream());
+            asset = new Asset(file.getInputStream(),file.getOriginalFilename());
             int sizeAsset=asset.getData().length;
             Preconditions.checkState(sizeUpload==sizeAsset);
             repository.save(asset);

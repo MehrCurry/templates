@@ -2,9 +2,7 @@ package de.gzockoll.prototype.templates.ui;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.Page;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import de.gzockoll.prototype.templates.control.AssetController;
@@ -14,7 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 
 @Component
 @Scope("prototype")
@@ -36,7 +35,7 @@ public class CommonParts extends VerticalLayout implements View,Upload.Receiver 
 
         Upload upload = new Upload("Upload it here", this);
         upload.addFinishedListener(e -> {
-                    Asset a = new Asset(data.toByteArray());
+                    Asset a = new Asset(data.toByteArray(),e.getFilename());
                     controller.save(a);
                 });
                 addComponent(upload);

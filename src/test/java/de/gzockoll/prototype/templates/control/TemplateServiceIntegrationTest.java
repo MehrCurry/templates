@@ -13,8 +13,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +46,7 @@ public class TemplateServiceIntegrationTest {
     @Test
     public void testDetachedApproval() {
         Template t = repository.save(new Template("de"));
-        final Asset a = new Asset(new ByteArrayInputStream("junit".getBytes()));
+        final Asset a = new Asset(new ByteArrayInputStream("junit".getBytes()),"junit.txt");
         assets.save(a);
         t.assignTransform(a).assignStationary(a).requestApproval().approve();
         service.updateTemplate(t);
@@ -56,9 +54,9 @@ public class TemplateServiceIntegrationTest {
 
     @Test
     public void testPreview() throws IOException {
-        Asset a1=new Asset(new ByteArrayInputStream(Files.readAllBytes(Paths.get("camel/vorlage/template.xsl"))));
+        Asset a1=new Asset("camel/vorlage/template.xsl");
         assets.save(a1);
-        Asset a2 = new Asset(new ByteArrayInputStream(Files.readAllBytes(Paths.get("camel/vorlage/stationery.pdf"))));
+        Asset a2 = new Asset("camel/vorlage/stationery.pdf");
         assets.save(a2);
         Template t=new Template("de").assignTransform(a1).assignStationary(a2).requestApproval().approve();
         byte[] result = service.preview(t);

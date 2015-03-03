@@ -1,0 +1,6 @@
+Tests that end in ITest:
+.*ITest
+.*IntegrationTest
+
+Inner Classes:
+.*\$.*
