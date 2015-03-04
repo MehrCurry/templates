@@ -21,8 +21,4 @@ public abstract class AbstractEntity {
     private long version;
 
     final private Date createdAt = new Date();
-
-    public List<String> getHiddenAttributes() {
-        return ImmutableList.of("hiddenAttributes", "id", "version", "createdAt");
-    }
 }

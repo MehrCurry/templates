@@ -1,5 +1,7 @@
 package de.gzockoll.prototype.templates.ui.viewmodel;
 
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
@@ -51,7 +53,17 @@ public class TemplateViewModel {
         table.setPageLength(20);
         table.setVisibleColumns(new Object[]{"id","state", "transform", "stationery", "createdAt"});
         view.setTemplateDataSource(templateItem);
-        view.getSaveButton().addClickListener(clickEvent -> log.debug("Save!"));
+        view.getSaveButton().addClickListener(clickEvent -> {
+            try {
+                BeanFieldGroup<Template> group = view.getGroup();
+                group.commit();
+                BeanItem<Template> beanItem = group.getItemDataSource();
+                Template t=beanItem.getBean();
+                repository.save(t);
+            } catch (FieldGroup.CommitException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public View getView() {

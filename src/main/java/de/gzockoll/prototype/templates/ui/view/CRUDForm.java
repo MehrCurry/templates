@@ -1,5 +1,6 @@
 package de.gzockoll.prototype.templates.ui.view;
 
+import com.google.common.collect.Sets;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
@@ -8,28 +9,33 @@ import com.vaadin.event.Action;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.AbstractEntity;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import static com.vaadin.event.Action.Handler;
 
 public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
     private static final int MAX_PAGE_LENGTH = 20;
     private final Class<T> clazz;
-    private VerticalLayout layout=new VerticalLayout();
-    private Table table=new Table();
+    private final Collection<String> hiddenProperties = new HashSet<>();
+    private VerticalLayout layout = new VerticalLayout();
+    private Table table = new Table();
     private BeanItemContainer<T> tableContainer;
     private FieldGroup fieldGroup;
     private Action actionDelete = new Action("Delete");
 
-        public CRUDForm(Class<T> clazz) {
-            this.clazz=clazz;
-            initTable();
-            layout.addComponent(createAddButton());
-            layout.addComponent(table);
-            table.setPageLength(20);
-            setCompositionRoot(layout);
+    public CRUDForm(Class<T> clazz, String... hiddenProperties) {
+        this.clazz = clazz;
+        this.hiddenProperties.addAll(Sets.newHashSet(hiddenProperties));
+        initTable();
+        layout.addComponent(createAddButton());
+        layout.addComponent(table);
+        table.setPageLength(20);
+        setCompositionRoot(layout);
     }
 
     private Component createAddButton() {
-        Button button=new Button("Add");
+        Button button = new Button("Add");
         button.addClickListener(event -> {
             try {
                 openDetailWindow(new BeanItem<T>(clazz.newInstance()), "Add " + clazz.getSimpleName());
@@ -46,7 +52,7 @@ public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
         table.setSelectable(true);
         table.addItemClickListener(itemClickEvent -> {
             if (itemClickEvent.isDoubleClick()) {
-                openDetailWindow((BeanItem) itemClickEvent.getItem(),"Edit " + clazz.getSimpleName());
+                openDetailWindow((BeanItem) itemClickEvent.getItem(), "Edit " + clazz.getSimpleName());
             }
         });
         table.addActionHandler(new Handler() {
@@ -62,7 +68,7 @@ public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
 
             @Override
             public Action[] getActions(Object o, Object o1) {
-                return new Action[] { actionDelete };
+                return new Action[]{actionDelete};
             }
         });
     }
@@ -77,10 +83,10 @@ public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
     }
 
     private void openDetailWindow(BeanItem item, String s) {
-        Window window=new Window();
+        Window window = new Window();
         window.setModal(true);
 
-        FormLayout layout=new FormLayout();
+        FormLayout layout = new FormLayout();
         layout.setMargin(true);
         window.setContent(layout);
 
@@ -89,20 +95,29 @@ public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
 
         fieldGroup.getUnboundPropertyIds().stream().forEach(e -> {
             T bean = (T) item.getBean();
-            if (!bean.getHiddenAttributes().contains(e)) {
-                layout.addComponent(fieldGroup.buildAndBind(e));
+            if (!hiddenProperties.contains(e)) {
+                Field<?> field = fieldGroup.buildAndBind(e);
+                field.setReadOnly(false);
+                layout.addComponent(field);
             }
         });
         layout.addComponent(createOkButton(window));
+        layout.addComponent(createCancelButton(window));
         getUI().addWindow(window);
     }
 
+    private Component createCancelButton(Window window) {
+        Button cancelButton = new Button("Cancel");
+        cancelButton.addClickListener(e -> window.close());
+        return cancelButton;
+    }
+
     private Component createOkButton(Window window) {
-        Button okButton=new Button();
+        Button okButton = new Button("OK");
         okButton.addClickListener(e -> {
                     try {
                         fieldGroup.commit();
-                        BeanItem<T> beanItem= (BeanItem<T>) fieldGroup.getItemDataSource();
+                        BeanItem<T> beanItem = (BeanItem<T>) fieldGroup.getItemDataSource();
                         tableContainer.addItem(beanItem);
                         updateTable();
                         window.close();
@@ -119,7 +134,7 @@ public class CRUDForm<T extends AbstractEntity> extends CustomComponent {
     }
 
     public void setBeanItemContainerDataSource(BeanItemContainer<T> container) {
-        this.tableContainer=container;
+        this.tableContainer = container;
         updateTable();
     }
 

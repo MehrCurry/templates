@@ -25,16 +25,6 @@ public class AssetController {
     @Autowired
     private AssetRepository repository;
 
-    /**
-     * Adds a document to the archive.
-     *
-     * Url: /archive/upload?file={file}&person={person}&date={date} [POST]
-     *
-     * @param file A file posted in a multipart request
-     * @param person The name of the uploading person
-     * @param date The date of the document
-     * @return The meta data of the added document
-     */
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public @ResponseBody
     Asset handleFileUpload(

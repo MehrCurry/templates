@@ -17,7 +17,7 @@ public class AssetView extends CustomComponent {
     Table assetTable=new Table();
     Button preview=new Button("Preview");
     Label time=new Label();
-    CRUDForm<Asset> crudForm=new CRUDForm<>(Asset.class);
+    CRUDForm<Asset> crudForm=new CRUDForm<>(Asset.class,"id","version","createdAt","data");
 
     @PostConstruct
     public void init() {
