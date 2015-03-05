@@ -21,11 +21,13 @@ import org.vaadin.spring.annotation.VaadinUIScope;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 
 @Component
 @VaadinUIScope
 @Slf4j
 public class TemplateViewModel implements View {
+    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     @Autowired
     private TemplateRepository repository;
@@ -74,7 +76,7 @@ public class TemplateViewModel implements View {
                 BeanItem<Template> beanItem = view.getGroup().getItemDataSource();
                 Template t=beanItem.getBean();
                 repository.save(t);
-                view.getEditor().setValue(new String(t.getTransform().getData()));
+                view.getEditor().setValue(new String(t.getTransform().getData(), UTF_8));
                 refreshTable();
             } catch (FieldGroup.CommitException e) {
                 e.printStackTrace();
@@ -95,6 +97,10 @@ public class TemplateViewModel implements View {
             previewPDF.setSizeFull();
         });
         view.getTransform().addValueChangeListener(event -> view.getEditor().setValue(event.toString()));
+        view.getEditor().addValueChangeListener(event -> {
+            Template t = templateItem.getBean();
+            // t.getTransform().updateData(event.getProperty().getValue());
+        });
     }
 
     public View getView() {

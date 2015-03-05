@@ -8,8 +8,6 @@ import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.Template;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.vaadin.aceeditor.AceEditor;
-import org.vaadin.aceeditor.AceMode;
 import org.vaadin.spring.annotation.VaadinUIScope;
 import org.vaadin.spring.navigator.annotation.VaadinView;
 
@@ -29,12 +27,12 @@ public class TemplateView extends CustomComponent implements View {
     private View viewChangeListener;
     private BeanFieldGroup<Template> group=new BeanFieldGroup<>(Template.class);
     private Embedded previewPDF=new Embedded();
-    private AceEditor editor=new AceEditor();
+    private TextArea editor=new TextArea();
 
     @PostConstruct
     public void init() {
         VerticalLayout layout=new VerticalLayout();
-        layout.setHeightUndefined();
+        layout.setHeight("20%");
         layout.setWidth("100%");
 
         table.setPageLength(10);
@@ -44,6 +42,9 @@ public class TemplateView extends CustomComponent implements View {
         details.setSizeFull();
         details.setMargin(true);
         FormLayout left=new FormLayout();
+
+        VerticalLayout middle=new VerticalLayout();
+        middle.setSizeFull();
 
         VerticalLayout right=new VerticalLayout();
         language.setImmediate(true);
@@ -55,10 +56,12 @@ public class TemplateView extends CustomComponent implements View {
         group.bindMemberFields(this);
         left.addComponent(saveButton);
         details.addComponent(left);
-        editor.setMode(AceMode.xml);
-        details.addComponent(editor);
+        editor.setSizeFull();
 
-        right.addComponent(preview);
+        middle.addComponent(editor);
+        middle.addComponent(preview);
+        details.addComponent(middle);
+
         previewPDF.setSizeFull();
         right.addComponent(previewPDF);
         details.addComponent(right);

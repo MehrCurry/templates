@@ -58,4 +58,8 @@ public class Asset extends AbstractEntity {
     public long getSize() {
         return data != null ? data.length : 0L;
     }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
 }

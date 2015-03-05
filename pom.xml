@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<start-class>de.gzockoll.prototype.templates.TemplatesApplication</start-class>
 		<java.version>1.8</java.version>
-        <camel.version>2.14.0</camel.version>
+        <camel.version>[2.14.0,)</camel.version>
         <pdfbox.version>2.0.0-SNAPSHOT</pdfbox.version>
         <vaadin.version>7.4.0</vaadin.version>
     </properties>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>1.7.1</version>
+            <version>[1.7.1,)</version>
             <scope>test</scope>
         </dependency>
 
@@ -84,11 +84,6 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-blueprint</artifactId>
             <version>${camel.version}</version>
         </dependency>
         <dependency>
@@ -135,11 +130,6 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.vaadin.addons</groupId>
-            <artifactId>aceeditor</artifactId>
-            <version>0.8.13</version>
         </dependency>
     </dependencies>
 
