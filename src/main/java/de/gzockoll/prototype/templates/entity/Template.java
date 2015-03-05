@@ -3,6 +3,7 @@ package de.gzockoll.prototype.templates.entity;
 import com.google.gwt.thirdparty.guava.common.base.Preconditions;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
@@ -10,7 +11,7 @@ import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Entity @EqualsAndHashCode(exclude = "id") @ToString @Getter
+@Entity @EqualsAndHashCode(exclude = "id") @ToString @Getter @Setter
 public class Template extends AbstractEntity {
 
     @NotNull
