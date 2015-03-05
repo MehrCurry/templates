@@ -1,6 +1,7 @@
 package de.gzockoll.prototype.templates.entity;
 
 import com.google.gwt.thirdparty.guava.common.base.Preconditions;
+import de.gzockoll.prototype.templates.validation.ValidISOLanguageCode;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +16,7 @@ import javax.validation.constraints.Size;
 public class Template extends AbstractEntity {
 
     @NotNull
-    @Size(min = 2,max = 2)
+    @ValidISOLanguageCode
     private String language;
 
     @OneToOne
