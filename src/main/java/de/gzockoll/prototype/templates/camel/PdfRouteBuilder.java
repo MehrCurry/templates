@@ -10,6 +10,9 @@ public class PdfRouteBuilder extends RouteBuilder {
         from("direct:xml2pdf").
                 recipientList(simple("xslt:http://localhost:9090/assets/raw/${header.templateId}?contentCache=false")).
                 to("fop:application/pdf").to("overlayProcessor");
+        from("direct:preview2pdf").
+                recipientList(simple("xslt:file:///${header.tmpFile}?contentCache=false")).
+                to("fop:application/pdf").to("overlayProcessor");
 
     }
 }

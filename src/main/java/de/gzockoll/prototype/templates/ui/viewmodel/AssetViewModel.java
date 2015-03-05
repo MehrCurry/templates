@@ -57,7 +57,7 @@ public class AssetViewModel {
                             .assignTransform(assetRepository.findOne(1L))
                             .assignStationary(assetRepository.findOne(2L));
                     Stopwatch sw = Stopwatch.createStarted();
-                    byte[] data = service.preview(forPreview);
+                    byte[] data = service.generate(forPreview);
                     sw.stop();
                     assetView.getTime().setValue(sw.toString());
                     showPDF(data);

@@ -83,10 +83,8 @@ public class TemplateViewModel implements View {
             }
         });
         view.getPreview().addClickListener(clickEvent -> {
-            BeanItem<Template> beanItem = view.getGroup().getItemDataSource();
-            Template t=beanItem.getBean();
-            byte[] data = service.preview(t);
-
+            Template t = templateItem.getBean();
+            byte[] data=service.preview((String) view.getEditor().getValue(), t.getStationery());
             final Embedded previewPDF = view.getPreviewPDF();
             previewPDF.setSource(new StreamResource(() -> {
                 return new ByteArrayInputStream(data);
@@ -97,10 +95,6 @@ public class TemplateViewModel implements View {
             previewPDF.setSizeFull();
         });
         view.getTransform().addValueChangeListener(event -> view.getEditor().setValue(event.toString()));
-        view.getEditor().addValueChangeListener(event -> {
-            Template t = templateItem.getBean();
-            // t.getTransform().updateData(event.getProperty().getValue());
-        });
     }
 
     public View getView() {

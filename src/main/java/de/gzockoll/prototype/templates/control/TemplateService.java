@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -28,6 +29,9 @@ public class TemplateService {
 
     @EndpointInject(uri="direct:xml2pdf")
     ProducerTemplate producer;
+
+    @EndpointInject(uri="direct:preview2pdf")
+    ProducerTemplate previewProducer;
 
     public void requestApproval(long templateId) {
         Template t=repository.findOne(templateId);
@@ -50,7 +54,7 @@ public class TemplateService {
     public void updateTemplate(Template t) {
         repository.save(t);
     }
-    public byte[] preview(Template t) {
+    public byte[] generate(Template t) {
         try {
             String data = new String(Files.readAllBytes(Paths.get("camel/vorlage/dataset.xml")), Charset.forName("UTF-8"));
             final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
@@ -60,6 +64,24 @@ public class TemplateService {
             return (byte[]) producer.requestBodyAndHeaders(data, headers);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+    public byte[] preview(String xslt,Asset stationery) {
+        Path tmpFile=null;
+        try {
+            String data = new String(Files.readAllBytes(Paths.get("camel/vorlage/dataset.xml")), Charset.forName("UTF-8"));
+            tmpFile = Files.createTempFile("tm", ".xslt");
+            Files.write(tmpFile,xslt.getBytes());
+            final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
+                    .put("tmpFile", tmpFile.toFile().getCanonicalPath())
+                    .put("stationeryId", stationery.getId())
+                    .build();
+            return (byte[]) previewProducer.requestBodyAndHeaders(data, headers);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (tmpFile!=null)
+                tmpFile.toFile().delete();
         }
     }
 

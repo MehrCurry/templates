@@ -60,7 +60,7 @@ public class TemplateServiceIntegrationTest {
         Asset a2 = new Asset("camel/vorlage/stationery.pdf");
         assets.save(a2);
         Template t=new Template("de").assignTransform(a1).assignStationary(a2).requestApproval().approve();
-        byte[] result = service.preview(t);
+        byte[] result = service.generate(t);
         Tika tika=new Tika();
         assertThat(tika.detect(result)).isEqualTo("application/pdf");
     }
