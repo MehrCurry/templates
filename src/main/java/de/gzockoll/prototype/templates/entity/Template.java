@@ -8,11 +8,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-@Entity @EqualsAndHashCode(exclude = "id") @ToString @Getter @Setter
+@Entity @EqualsAndHashCode(callSuper = false) @ToString @Getter @Setter
 public class Template extends AbstractEntity {
 
     @NotNull
@@ -20,9 +21,11 @@ public class Template extends AbstractEntity {
     private String language;
 
     @OneToOne
+    @NotNull
     private Asset transform;
 
-    @OneToOne
+    @ManyToOne
+    @NotNull
     private Asset stationery;
 
     public Template() {
@@ -54,10 +57,6 @@ public class Template extends AbstractEntity {
         return this;
     }
 
-    public String getLanguage() {
-        return language;
-    }
-
     public Template assignTransform(Asset a) {
         Preconditions.checkNotNull(a);
         state=state.assignTransform(this, a);
@@ -68,15 +67,5 @@ public class Template extends AbstractEntity {
         Preconditions.checkNotNull(a);
         state=state.assignStationary(this, a);
         return this;
-    }
-
-    void setTransform(Asset a) {
-        Preconditions.checkNotNull(a);
-        this.transform=a;
-    }
-
-    void setStationery(Asset a) {
-        Preconditions.checkNotNull(a);
-        this.stationery =a;
     }
 }

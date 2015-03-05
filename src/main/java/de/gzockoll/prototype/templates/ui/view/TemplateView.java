@@ -8,14 +8,10 @@ import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.Template;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.tylproject.vaadin.addon.datanav.ButtonBar;
-import org.tylproject.vaadin.addon.datanav.NavigationLabel;
-import org.tylproject.vaadin.addon.fieldbinder.FieldBinder;
+import org.vaadin.aceeditor.AceEditor;
+import org.vaadin.aceeditor.AceMode;
 import org.vaadin.spring.annotation.VaadinUIScope;
 import org.vaadin.spring.navigator.annotation.VaadinView;
-import org.vaadin.viritin.FilterableListContainer;
-import org.vaadin.viritin.layouts.MFormLayout;
-import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import javax.annotation.PostConstruct;
 
@@ -26,42 +22,53 @@ import javax.annotation.PostConstruct;
 public class TemplateView extends CustomComponent implements View {
     private Table table=new Table();
     private Button preview=new Button("Preview");
-    private BeanFieldGroup<Template> group=new BeanFieldGroup<>(Template.class);
     private Button saveButton=new Button("Save");
     private TextField language=new TextField("Language");
-    private ComboBox templates=new ComboBox("XSL Transformer");
+    private ComboBox transform=new ComboBox("XSL Transformer");
     private ComboBox stationery = new ComboBox("Stationery");
     private View viewChangeListener;
-
-    // initialize an empty container
-    final FilterableListContainer<Template> container =
-            new FilterableListContainer<Template>(Template.class);
-
-    // FIELD BINDER
-    // initialize the FieldBinder for the given container
-    final FieldBinder<Template> binder = new FieldBinder<Template>(Template.class, container);
+    private BeanFieldGroup<Template> group=new BeanFieldGroup<>(Template.class);
+    private Embedded previewPDF=new Embedded();
+    private AceEditor editor=new AceEditor();
 
     @PostConstruct
     public void init() {
         VerticalLayout layout=new VerticalLayout();
-        layout.setSizeFull();
-        layout.addComponent(preview);
-        layout.addComponent(saveButton);
+        layout.setHeightUndefined();
+        layout.setWidth("100%");
 
-        binder.setBuffered(true);
-
+        table.setPageLength(10);
         layout.addComponent(table);
 
-        layout.addComponent(language);
-        layout.addComponent(templates);
-        layout.addComponent(stationery);
-        group.bindMemberFields(this);
+        HorizontalLayout details=new HorizontalLayout();
+        details.setSizeFull();
+        details.setMargin(true);
+        FormLayout left=new FormLayout();
 
+        VerticalLayout right=new VerticalLayout();
+        language.setImmediate(true);
+        left.addComponent(language);
+        left.addComponent(transform);
+        transform.setItemCaptionPropertyId("filename");
+        left.addComponent(stationery);
+        stationery.setItemCaptionPropertyId("filename");
+        group.bindMemberFields(this);
+        left.addComponent(saveButton);
+        details.addComponent(left);
+        editor.setMode(AceMode.xml);
+        details.addComponent(editor);
+
+        right.addComponent(preview);
+        previewPDF.setSizeFull();
+        right.addComponent(previewPDF);
+        details.addComponent(right);
+
+        layout.addComponent(details);
         setCompositionRoot(layout);
     }
 
     public void setTemplateDataSource(Item item) {
-        binder.setItemDataSource(item);
+        group.setItemDataSource(item);
     }
 
     @Override

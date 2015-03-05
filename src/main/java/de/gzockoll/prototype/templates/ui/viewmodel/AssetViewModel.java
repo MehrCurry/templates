@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 @Component
 @Scope("prototype")
@@ -32,7 +31,7 @@ public class AssetViewModel {
     @Autowired
     private TemplateService service;
 
-    BeanItemContainer<Asset> assetContainer=new BeanItemContainer<Asset>(Asset.class);
+    BeanItemContainer<Asset> assetContainer = new BeanItemContainer<Asset>(Asset.class);
 
     @PostConstruct
     public void init() {
@@ -51,28 +50,25 @@ public class AssetViewModel {
         assetTable.setContainerDataSource(assetContainer);
         assetTable.addValueChangeListener(e -> log.debug("Event: " + e));
         assetTable.setPageLength(20);
-        assetTable.setVisibleColumns(new Object[]{"id","filename","mimeType","size", "createdAt"});
+        assetTable.setVisibleColumns(new Object[]{"id", "filename", "mimeType", "size", "createdAt"});
 
         assetView.getPreview().addClickListener(e -> {
                     Template forPreview = new Template("de")
                             .assignTransform(assetRepository.findOne(1L))
                             .assignStationary(assetRepository.findOne(2L));
-                    try {
-                        Stopwatch sw=Stopwatch.createStarted();
-                        byte[] data = service.preview(forPreview);
-                        sw.stop();
-                        assetView.getTime().setValue(sw.toString());
-                        showPDF(data);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                    Stopwatch sw = Stopwatch.createStarted();
+                    byte[] data = service.preview(forPreview);
+                    sw.stop();
+                    assetView.getTime().setValue(sw.toString());
+                    showPDF(data);
                 }
         );
         assetView.getCrudForm().setBeanItemContainerDataSource(assetContainer);
     }
+
     public void showPDF(byte[] data) {
         Window window = new Window();
-        VerticalLayout layout=new VerticalLayout();
+        VerticalLayout layout = new VerticalLayout();
 
         Embedded pdf = new Embedded("Preview", new StreamResource(() -> {
             return new ByteArrayInputStream(data);

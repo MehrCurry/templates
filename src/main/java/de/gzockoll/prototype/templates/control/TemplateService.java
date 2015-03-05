@@ -36,6 +36,7 @@ public class TemplateService {
     }
 
     public TemplateGroup addTemplate(long tenantId, String language, String qualifier, Template t) {
+        repository.save(t);
         TemplateGroupPK pk = new TemplateGroupPK(tenantId, language, qualifier);
         TemplateGroup group = groupRepository.findOne(pk);
         if (group==null) {
@@ -49,13 +50,17 @@ public class TemplateService {
     public void updateTemplate(Template t) {
         repository.save(t);
     }
-    public byte[] preview(Template t) throws IOException {
-        String data= new String(Files.readAllBytes(Paths.get("camel/vorlage/dataset.xml")), Charset.forName("UTF-8"));
-        final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
-                .put("templateId", 1L)
-                .put("stationeryId", 2L)
-                .build();
-        return (byte[]) producer.requestBodyAndHeaders(data, headers);
+    public byte[] preview(Template t) {
+        try {
+            String data = new String(Files.readAllBytes(Paths.get("camel/vorlage/dataset.xml")), Charset.forName("UTF-8"));
+            final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
+                    .put("templateId", t.getTransform().getId())
+                    .put("stationeryId", t.getStationery().getId())
+                    .build();
+            return (byte[]) producer.requestBodyAndHeaders(data, headers);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

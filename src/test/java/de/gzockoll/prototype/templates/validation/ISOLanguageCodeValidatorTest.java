@@ -81,7 +81,5 @@ public class ISOLanguageCodeValidatorTest {
 
         @ValidISOLanguageCode
         private String language;
-
-
     }
 }

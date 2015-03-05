@@ -11,7 +11,6 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,15 +37,17 @@ public class TemplateServiceIntegrationTest {
 
     @Test
     public void testGroup() {
-        Template t=new Template("de");
+        Asset anAsset=new Asset("JUnit".getBytes(),"junit.txt");
+        assets.save(anAsset);
+        Template t=new Template("de").assignTransform(anAsset).assignStationary(anAsset);
         TemplateGroup group = service.addTemplate(1, "de", "junit", t);
         assertThat(group).isNotNull();
     }
 
     @Test
     public void testDetachedApproval() {
-        Template t = repository.save(new Template("de"));
-        final Asset a = new Asset(new ByteArrayInputStream("junit".getBytes()),"junit.txt");
+        Template t = new Template("de");
+        final Asset a = new Asset("junit".getBytes(),"junit.txt");
         assets.save(a);
         t.assignTransform(a).assignStationary(a).requestApproval().approve();
         service.updateTemplate(t);

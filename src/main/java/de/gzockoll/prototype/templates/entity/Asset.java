@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Entity
-@EqualsAndHashCode @ToString @Getter
+@EqualsAndHashCode(callSuper = false) @ToString @Getter
 public class Asset extends AbstractEntity {
     private static final Tika TIKA =new Tika();
 
