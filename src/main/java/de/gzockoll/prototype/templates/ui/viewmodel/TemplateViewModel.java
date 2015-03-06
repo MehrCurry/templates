@@ -1,22 +1,18 @@
 package de.gzockoll.prototype.templates.ui.viewmodel;
 
+import com.google.common.net.MediaType;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.BrowserWindowOpener;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
 import de.gzockoll.prototype.templates.entity.Template;
 import de.gzockoll.prototype.templates.entity.TemplateRepository;
-import de.gzockoll.prototype.templates.ui.PDFPopupUI;
-import de.gzockoll.prototype.templates.ui.view.PDFView;
+import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSource;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +24,15 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import static java.lang.StrictMath.min;
+
 @Component
 @VaadinUIScope
 @Slf4j
-public class TemplateViewModel implements View {
+public class TemplateViewModel implements View, OnDemandStreamSource {
     private static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final String MIME_TYPE_PDF = MediaType.PDF.toString();
+    public static final String MIME_TYPE_XSLT = "application/xslt+xml";
 
     @Autowired
     private TemplateRepository repository;
@@ -46,16 +46,10 @@ public class TemplateViewModel implements View {
     @Autowired
     private TemplateService service;
 
-    @Autowired
-    private PDFView pdfView;
-
-    @Autowired
-    private PDFPopupUI popupUI;
-
-    private BeanItemContainer<Template> templateContainer =new BeanItemContainer<Template>(Template.class);
-    private BeanItem<Template> templateItem=new BeanItem<>(new Template("de"));
-    private BeanItemContainer<Asset> xslContainer=new BeanItemContainer<Asset>(Asset.class);
-    private BeanItemContainer<Asset> pdfContainer=new BeanItemContainer<Asset>(Asset.class);
+    private BeanItemContainer<Template> templateContainer = new BeanItemContainer<Template>(Template.class);
+    private BeanItem<Template> templateItem = new BeanItem<>(new Template("de"));
+    private BeanItemContainer<Asset> xslContainer = new BeanItemContainer<Asset>(Asset.class);
+    private BeanItemContainer<Asset> pdfContainer = new BeanItemContainer<Asset>(Asset.class);
 
     @PostConstruct
     public void init() {
@@ -78,35 +72,31 @@ public class TemplateViewModel implements View {
         view.getStationery().setContainerDataSource(pdfContainer);
         table.setContainerDataSource(templateContainer);
         table.addValueChangeListener(e -> log.debug("Event: " + e));
-        table.setPageLength(20);
-        table.setVisibleColumns(new Object[]{"id","state", "transform", "stationery", "createdAt"});
+        table.setPageLength(min(6, table.size()));
+        table.setVisibleColumns(new Object[]{"id", "state", "transform", "stationery", "createdAt"});
         view.setTemplateDataSource(templateItem);
         view.getSaveButton().addClickListener(clickEvent -> {
             try {
                 view.getGroup().commit();
                 BeanItem<Template> beanItem = view.getGroup().getItemDataSource();
-                Template t=beanItem.getBean();
-                repository.save(t);
+                Template t = beanItem.getBean();
+                Template updatedVersion=repository.save(t);
+                templateItem=new BeanItem<Template>(updatedVersion);
+                view.getGroup().setItemDataSource(templateItem);
                 view.getEditor().setValue(new String(t.getTransform().getData(), UTF_8));
                 refreshTable();
             } catch (FieldGroup.CommitException e) {
                 e.printStackTrace();
             }
         });
-        view.getPreviewButton().addClickListener(clickEvent -> {
-            Template t = templateItem.getBean();
-            byte[] data=service.preview((String) view.getEditor().getValue(), t.getStationery());
-            view.showPDF(data);
-            Resource resource = new StreamResource(() -> null,"preview.pdf");
-            BrowserWindowOpener opener =
-                    new BrowserWindowOpener(popupUI);
-            opener.setFeatures("height=200,width=300,resizable");
-
-
-// Attach it to a button
-            Button button = new Button("Pop It Up");
-            opener.extend(button);        });
-        view.getTransform().addValueChangeListener(event -> view.getEditor().setValue(event.toString()));
+        view.getStreamSource().setDelegate(this);
+        table.addItemClickListener(e -> {
+            BeanItem item = (BeanItem) e.getItem();
+            view.getGroup().setItemDataSource(item);
+        });
+        view.getTransform().addValueChangeListener(e->
+                view.getEditor().setValue(new String(((Asset)e.getProperty().getValue()).getData()))
+        );
     }
 
     public View getView() {
@@ -122,8 +112,20 @@ public class TemplateViewModel implements View {
         templateContainer.removeAllItems();
         templateContainer.addAll(repository.findAll());
         xslContainer.removeAllItems();
-        xslContainer.addAll(assetRepository.findByMimeType("application/xslt+xml"));
+        xslContainer.addAll(assetRepository.findByMimeType(MIME_TYPE_XSLT));
         pdfContainer.removeAllItems();
-        pdfContainer.addAll(assetRepository.findByMimeType("application/pdf"));
+        pdfContainer.addAll(assetRepository.findByMimeType(MIME_TYPE_PDF));
+    }
+
+    @Override
+    public String getFilename() {
+        return "preview.pdf";
+    }
+
+    @Override
+    public InputStream getStream() {
+        Template t = templateItem.getBean();
+        byte[] data = service.preview((String) view.getEditor().getValue(), t.getStationery());
+        return new ByteArrayInputStream(data);
     }
 }

@@ -1,7 +1,9 @@
 package de.gzockoll.prototype.templates.ui.view;
 
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.ui.*;
-import de.gzockoll.prototype.templates.entity.Asset;
+import com.vaadin.ui.themes.ValoTheme;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,30 +15,55 @@ import javax.annotation.PostConstruct;
 @VaadinUIScope
 @Getter
 @Slf4j
-public class AssetView extends CustomComponent {
-    Table assetTable=new Table();
-    Button preview=new Button("Preview");
-    Label time=new Label();
-    CRUDForm<Asset> crudForm=new CRUDForm<>(Asset.class,"id","version","createdAt","data");
+public class AssetView extends CustomComponent implements View {
+    private Table assetTable=new Table();
+    private Label time=new Label();
+    private Upload upload = new Upload("Upload it here",null);
+    private Button.ClickListener removeListener;
+    private Button.ClickListener previewListener;
+
+    public void setRemoveListener(Button.ClickListener removeListener) {
+        this.removeListener = removeListener;
+    }
+
+    public void setPreviewListener(Button.ClickListener previewListener) {
+        this.previewListener = previewListener;
+    }
 
     @PostConstruct
     public void init() {
         VerticalLayout layout=new VerticalLayout();
-        layout.setSizeFull();
-        layout.addComponent(preview);
         layout.addComponent(time);
-        assetTable.addGeneratedColumn("Remove",new Table.ColumnGenerator() {
-            @Override
-            public Object generateCell(Table table, Object itemId, Object columnId) {
-                Button removeButton = new Button("x");
-                removeButton.addClickListener(e -> table.removeItem(itemId));
-                return removeButton;
-            }
+        layout.addComponent(upload);
+        assetTable.addGeneratedColumn("Links", (table, itemId, columnId) -> {
+            HorizontalLayout links=new HorizontalLayout();
+            Button previewButton = new Button("Preview");
+            previewButton.setStyleName(ValoTheme.BUTTON_LINK);
+            previewButton.addClickListener(e -> {
+                table.select(itemId);
+                if (previewListener != null)
+                    previewListener.buttonClick(e);
+            });
+            links.addComponent(previewButton);
+            Button removeButton = new Button("Delete");
+            removeButton.setStyleName(ValoTheme.BUTTON_LINK);
+            removeButton.addClickListener(e -> {
+                table.select(itemId);
+                if (removeListener != null) {
+                    removeListener.buttonClick(e);
+                }
+            });
+            links.addComponent(removeButton);
+            return links;
         });
+        assetTable.setColumnHeader("Remove","");
 
         layout.addComponent(assetTable);
-        layout.addComponent(crudForm);
-
         setCompositionRoot(layout);
+    }
+
+    @Override
+    public void enter(ViewChangeListener.ViewChangeEvent event) {
+
     }
 }

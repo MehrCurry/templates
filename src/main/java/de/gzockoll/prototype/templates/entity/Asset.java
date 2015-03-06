@@ -9,6 +9,7 @@ import org.apache.tika.Tika;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,5 +75,9 @@ public class Asset extends AbstractEntity {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    public InputStream asByteStream() {
+        return new ByteArrayInputStream(data);
     }
 }

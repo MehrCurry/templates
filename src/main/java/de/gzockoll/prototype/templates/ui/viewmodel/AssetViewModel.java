@@ -1,14 +1,12 @@
 package de.gzockoll.prototype.templates.ui.viewmodel;
 
-import com.google.common.base.Stopwatch;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.*;
-import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
-import de.gzockoll.prototype.templates.entity.Template;
 import de.gzockoll.prototype.templates.ui.view.AssetView;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -16,10 +14,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 @Component
 @Scope("prototype")
 @Slf4j
+@Getter
 public class AssetViewModel {
 
     @Autowired
@@ -28,10 +28,8 @@ public class AssetViewModel {
     @Autowired
     private AssetView assetView;
 
-    @Autowired
-    private TemplateService service;
-
     BeanItemContainer<Asset> assetContainer = new BeanItemContainer<Asset>(Asset.class);
+    private ByteArrayOutputStream data;
 
     @PostConstruct
     public void init() {
@@ -50,20 +48,25 @@ public class AssetViewModel {
         assetTable.setContainerDataSource(assetContainer);
         assetTable.addValueChangeListener(e -> log.debug("Event: " + e));
         assetTable.setPageLength(20);
-        assetTable.setVisibleColumns(new Object[]{"id", "filename", "mimeType", "size", "createdAt"});
-
-        assetView.getPreview().addClickListener(e -> {
-                    Template forPreview = new Template("de")
-                            .assignTransform(assetRepository.findOne(1L))
-                            .assignStationary(assetRepository.findOne(2L));
-                    Stopwatch sw = Stopwatch.createStarted();
-                    byte[] data = service.generate(forPreview);
-                    sw.stop();
-                    assetView.getTime().setValue(sw.toString());
-                    showPDF(data);
-                }
+        assetTable.setVisibleColumns(new Object[]{"id", "filename", "mimeType", "size", "createdAt", "Links"});
+        assetContainer.addItemSetChangeListener(event -> {
+            ;
+        });
+        assetView.getUpload().setReceiver((filename, mimeType) -> {
+            data = new ByteArrayOutputStream();
+            return data;
+        });
+        assetView.getUpload().addFinishedListener(e -> {
+            Asset a = new Asset(data.toByteArray(), e.getFilename());
+            assetRepository.save(a);
+            refreshTable();
+        });
+        assetView.setRemoveListener(e ->
+                        log.debug(e.toString())
         );
-        assetView.getCrudForm().setBeanItemContainerDataSource(assetContainer);
+        assetView.setPreviewListener(e ->
+                        log.debug(e.toString())
+        );
     }
 
     public void showPDF(byte[] data) {

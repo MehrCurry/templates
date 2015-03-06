@@ -9,6 +9,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
+import de.gzockoll.prototype.templates.ui.viewmodel.AssetViewModel;
 import de.gzockoll.prototype.templates.ui.viewmodel.TemplateViewModel;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class MainUI extends UI {
     private AssetRepository assetRepository;
 
     @Autowired
-    private CommonParts commonParts;
+    private AssetViewModel assetViewModel;
 
     @Autowired
     private TemplateViewModel templateViewModel;
@@ -69,14 +70,14 @@ public class MainUI extends UI {
         root.addMenu(buildMenu());
 
         navigator = new Navigator(this, viewDisplay);
-        navigator.addView("assets", commonParts);
+        navigator.addView("assets", assetViewModel.getAssetView());
         navigator.addView("templates", templateViewModel.getView());
 
         final String f = Page.getCurrent().getUriFragment();
         if (StringUtils.isEmpty(f)) {
             navigator.navigateTo("assets");
         }
-        navigator.setErrorView(commonParts);
+        navigator.setErrorView(assetViewModel.getAssetView());
 
         navigator.addViewChangeListener(new ViewChangeListener() {
 

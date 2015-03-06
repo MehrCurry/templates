@@ -9,7 +9,10 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Collections;
 
 @Component
@@ -24,6 +27,7 @@ public class OverlayProcessor implements Processor {
         PDDocument inputDocument=PDDocument.load(new ByteArrayInputStream(data.toByteArray()));
         final byte[] stationeryData = assetRepository.findOne((Long) exchange.getIn().getHeader("stationeryId")).getData();
         PDDocument stationery=PDDocument.load(new ByteArrayInputStream(stationeryData));
+        int pages=stationery.getNumberOfPages();
 
         File out= File.createTempFile("out", ".pdf");
 

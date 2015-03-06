@@ -4,16 +4,17 @@ import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.Template;
+import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSourceProxy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.vaadin.spring.annotation.VaadinUIScope;
 import org.vaadin.spring.navigator.annotation.VaadinView;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 
 @VaadinUIScope
 @Getter
@@ -30,20 +31,28 @@ public class TemplateView extends CustomComponent implements View {
     private BeanFieldGroup<Template> group=new BeanFieldGroup<>(Template.class);
     private Embedded previewPDF=new Embedded();
     private TextArea editor=new TextArea();
+    private OnDemandStreamSourceProxy streamSource=new OnDemandStreamSourceProxy();
+    private BrowserWindowOpener browserWindowOpener=new BrowserWindowOpener(new StreamResource(streamSource,"preview.pdf"));
 
     @PostConstruct
     public void init() {
         HorizontalLayout mainLayout=new HorizontalLayout();
+        mainLayout.setMargin(true);
         VerticalLayout left=new VerticalLayout();
         left.setSizeFull();
 
         table.setPageLength(6);
+        table.setSelectable(true);
         left.addComponent(table);
 
         left.addComponent(createForm());
 
         left.addComponent(editor);
+        editor.setImmediate(true);
+        editor.setWidth("100%");
+        editor.setHeight("200px");
         left.addComponent(previewButton);
+        browserWindowOpener.extend(previewButton);
 
         mainLayout.addComponent(left);
         setCompositionRoot(mainLayout);
@@ -73,26 +82,6 @@ public class TemplateView extends CustomComponent implements View {
             viewChangeListener.enter(viewChangeEvent);
         }
     }
-
-    public void showPDF(byte[] data) {
-        Window window = new Window();
-        VerticalLayout layout = new VerticalLayout();
-
-        Embedded pdf = new Embedded("Preview", new StreamResource(() -> {
-            return new ByteArrayInputStream(data);
-        }, "file.pdf"));
-
-        pdf.setType(Embedded.TYPE_BROWSER);
-        pdf.setMimeType("application/pdf");
-        pdf.setSizeFull();
-        layout.addComponent(pdf);
-        layout.setSizeFull();
-
-        window.setContent(layout);
-        window.setSizeFull();
-        UI.getCurrent().addWindow(window);
-    }
-
 
     public void setViewChangeListener(View viewChangeListener) {
         this.viewChangeListener = viewChangeListener;
