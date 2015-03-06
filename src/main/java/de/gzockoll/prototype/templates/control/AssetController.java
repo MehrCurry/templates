@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import de.gzockoll.prototype.templates.entity.Asset;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
+import org.apache.camel.component.file.GenericFile;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -12,10 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 @RestController
 @Slf4j
@@ -65,5 +64,10 @@ public class AssetController {
     public void save(Asset a) {
         Preconditions.checkNotNull(a);
         repository.save(a);
+    }
+
+    public void fileImport(Exchange ex) {
+        File file= (File) ex.getIn().getBody(GenericFile.class).getFile();
+        repository.save(new Asset(file));
     }
 }

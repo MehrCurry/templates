@@ -5,8 +5,6 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Embedded;
 import com.vaadin.ui.Table;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.vaadin.spring.annotation.VaadinUIScope;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 
 @Component
@@ -82,17 +79,10 @@ public class TemplateViewModel implements View {
                 e.printStackTrace();
             }
         });
-        view.getPreview().addClickListener(clickEvent -> {
+        view.getPreviewButton().addClickListener(clickEvent -> {
             Template t = templateItem.getBean();
             byte[] data=service.preview((String) view.getEditor().getValue(), t.getStationery());
-            final Embedded previewPDF = view.getPreviewPDF();
-            previewPDF.setSource(new StreamResource(() -> {
-                return new ByteArrayInputStream(data);
-            }, "file.pdf"));
-
-            previewPDF.setType(Embedded.TYPE_BROWSER);
-            previewPDF.setMimeType("application/pdf");
-            previewPDF.setSizeFull();
+            view.showPDF(data);
         });
         view.getTransform().addValueChangeListener(event -> view.getEditor().setValue(event.toString()));
     }

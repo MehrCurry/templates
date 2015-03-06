@@ -9,6 +9,7 @@ import org.apache.tika.Tika;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -16,9 +17,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Entity
-@EqualsAndHashCode(callSuper = false) @ToString @Getter
+@EqualsAndHashCode(callSuper = false)
+@ToString(exclude = "data")
+@Getter
 public class Asset extends AbstractEntity {
-    private static final Tika TIKA =new Tika();
+    private static final Tika TIKA = new Tika();
 
     @NotNull
     private String mimeType;
@@ -28,31 +31,41 @@ public class Asset extends AbstractEntity {
 
     private String filename;
 
-    public Asset() {}
-
-    public Asset (byte[] data,String filename) {
-        this.data=data;
-        this.mimeType= TIKA.detect(data);
-        this.filename=filename;
+    public Asset() {
     }
+
+    public Asset(byte[] data, String filename) {
+        this.data = data;
+        this.mimeType = TIKA.detect(data);
+        this.filename = filename;
+    }
+
     public Asset(InputStream is, String filename) {
         try {
-            this.data=ByteStreams.toByteArray(is);
-            this.mimeType= TIKA.detect(data);
+            this.data = ByteStreams.toByteArray(is);
+            this.mimeType = TIKA.detect(data);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public Asset(String path) {
+        final Path aPath = Paths.get(path);
+        createFromPath(aPath);
+    }
+
+    private void createFromPath(Path aPath) {
         try {
-            final Path aPath = Paths.get(path);
-            this.data= Files.readAllBytes(aPath);
-            this.mimeType= TIKA.detect(data);
-            this.filename=aPath.getFileName().toString();
+            this.data = Files.readAllBytes(aPath);
+            this.mimeType = TIKA.detect(data);
+            this.filename = aPath.getFileName().toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+    }
+
+    public Asset(File input) {
+        createFromPath(input.toPath());
     }
 
     public long getSize() {

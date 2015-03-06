@@ -13,6 +13,7 @@ public class PdfRouteBuilder extends RouteBuilder {
         from("direct:preview2pdf").
                 recipientList(simple("xslt:file:///${header.tmpFile}?contentCache=false")).
                 to("fop:application/pdf").to("overlayProcessor");
+        from("file:camel/vorlage?noop=true").to("bean:assetController?method=fileImport");
 
     }
 }

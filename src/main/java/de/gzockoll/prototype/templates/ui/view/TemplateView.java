@@ -4,6 +4,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.Template;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import org.vaadin.spring.annotation.VaadinUIScope;
 import org.vaadin.spring.navigator.annotation.VaadinView;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 
 @VaadinUIScope
 @Getter
@@ -19,7 +21,7 @@ import javax.annotation.PostConstruct;
 @VaadinView(name = "templateView")
 public class TemplateView extends CustomComponent implements View {
     private Table table=new Table();
-    private Button preview=new Button("Preview");
+    private Button previewButton =new Button("Preview");
     private Button saveButton=new Button("Save");
     private TextField language=new TextField("Language");
     private ComboBox transform=new ComboBox("XSL Transformer");
@@ -31,43 +33,34 @@ public class TemplateView extends CustomComponent implements View {
 
     @PostConstruct
     public void init() {
-        VerticalLayout layout=new VerticalLayout();
-        layout.setHeight("20%");
-        layout.setWidth("100%");
+        HorizontalLayout mainLayout=new HorizontalLayout();
+        VerticalLayout left=new VerticalLayout();
+        left.setSizeFull();
 
-        table.setPageLength(10);
-        layout.addComponent(table);
+        table.setPageLength(6);
+        left.addComponent(table);
 
-        HorizontalLayout details=new HorizontalLayout();
-        details.setSizeFull();
-        details.setMargin(true);
-        FormLayout left=new FormLayout();
+        left.addComponent(createForm());
 
-        VerticalLayout middle=new VerticalLayout();
-        middle.setSizeFull();
+        left.addComponent(editor);
+        left.addComponent(previewButton);
 
-        VerticalLayout right=new VerticalLayout();
+        mainLayout.addComponent(left);
+        setCompositionRoot(mainLayout);
+    }
+
+    private Component createForm() {
+        FormLayout form=new FormLayout();
+
         language.setImmediate(true);
-        left.addComponent(language);
-        left.addComponent(transform);
+        form.addComponent(language);
+        form.addComponent(transform);
         transform.setItemCaptionPropertyId("filename");
-        left.addComponent(stationery);
+        form.addComponent(stationery);
         stationery.setItemCaptionPropertyId("filename");
         group.bindMemberFields(this);
-        left.addComponent(saveButton);
-        details.addComponent(left);
-        editor.setSizeFull();
-
-        middle.addComponent(editor);
-        middle.addComponent(preview);
-        details.addComponent(middle);
-
-        previewPDF.setSizeFull();
-        right.addComponent(previewPDF);
-        details.addComponent(right);
-
-        layout.addComponent(details);
-        setCompositionRoot(layout);
+        form.addComponent(saveButton);
+        return form;
     }
 
     public void setTemplateDataSource(Item item) {
@@ -80,6 +73,26 @@ public class TemplateView extends CustomComponent implements View {
             viewChangeListener.enter(viewChangeEvent);
         }
     }
+
+    public void showPDF(byte[] data) {
+        Window window = new Window();
+        VerticalLayout layout = new VerticalLayout();
+
+        Embedded pdf = new Embedded("Preview", new StreamResource(() -> {
+            return new ByteArrayInputStream(data);
+        }, "file.pdf"));
+
+        pdf.setType(Embedded.TYPE_BROWSER);
+        pdf.setMimeType("application/pdf");
+        pdf.setSizeFull();
+        layout.addComponent(pdf);
+        layout.setSizeFull();
+
+        window.setContent(layout);
+        window.setSizeFull();
+        UI.getCurrent().addWindow(window);
+    }
+
 
     public void setViewChangeListener(View viewChangeListener) {
         this.viewChangeListener = viewChangeListener;
