@@ -5,12 +5,18 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.BrowserWindowOpener;
+import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Table;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
 import de.gzockoll.prototype.templates.entity.Template;
 import de.gzockoll.prototype.templates.entity.TemplateRepository;
+import de.gzockoll.prototype.templates.ui.PDFPopupUI;
+import de.gzockoll.prototype.templates.ui.view.PDFView;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +24,8 @@ import org.springframework.stereotype.Component;
 import org.vaadin.spring.annotation.VaadinUIScope;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 @Component
@@ -37,6 +45,12 @@ public class TemplateViewModel implements View {
 
     @Autowired
     private TemplateService service;
+
+    @Autowired
+    private PDFView pdfView;
+
+    @Autowired
+    private PDFPopupUI popupUI;
 
     private BeanItemContainer<Template> templateContainer =new BeanItemContainer<Template>(Template.class);
     private BeanItem<Template> templateItem=new BeanItem<>(new Template("de"));
@@ -83,7 +97,15 @@ public class TemplateViewModel implements View {
             Template t = templateItem.getBean();
             byte[] data=service.preview((String) view.getEditor().getValue(), t.getStationery());
             view.showPDF(data);
-        });
+            Resource resource = new StreamResource(() -> null,"preview.pdf");
+            BrowserWindowOpener opener =
+                    new BrowserWindowOpener(popupUI);
+            opener.setFeatures("height=200,width=300,resizable");
+
+
+// Attach it to a button
+            Button button = new Button("Pop It Up");
+            opener.extend(button);        });
         view.getTransform().addValueChangeListener(event -> view.getEditor().setValue(event.toString()));
     }
 
