@@ -33,10 +33,12 @@ public class TemplateView extends CustomComponent implements View {
     private TextArea editor=new TextArea();
     private OnDemandStreamSourceProxy streamSource=new OnDemandStreamSourceProxy();
     private BrowserWindowOpener browserWindowOpener=new BrowserWindowOpener(new StreamResource(streamSource,"preview.pdf"));
+    private Button newButton=new Button("Neu");
 
     @PostConstruct
     public void init() {
         HorizontalLayout mainLayout=new HorizontalLayout();
+        mainLayout.setSizeFull();
         mainLayout.setMargin(true);
         VerticalLayout left=new VerticalLayout();
         left.setSizeFull();
@@ -69,6 +71,7 @@ public class TemplateView extends CustomComponent implements View {
         stationery.setItemCaptionPropertyId("filename");
         group.bindMemberFields(this);
         form.addComponent(saveButton);
+        form.addComponent(newButton);
         return form;
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format" version="1.0" xmlns="http://www.renderx.com/XSL/Extensions" xmlns:rx="http://www.renderx.com/XSL/Extensions">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fo="http://www.w3.org/1999/XSL/Format" version="1.0">
     <xsl:output encoding="UTF-8" indent="yes" method="xml" standalone="no" omit-xml-declaration="no"/>
     <xsl:decimal-format name="de" decimal-separator=","
                         grouping-separator="." />
@@ -152,7 +152,7 @@
         <!-- PaymentProcessId -->
         <xsl:variable name="paymentProcessId" select="PaymentProcessId"/> <!-- "alt" txid, "neu" PaymentProccessId -->
         <!-- PaymentProcessReference -->
-        <xsl:variable name="paymentProcessReference" select="PaymentProcessReference"/> <!-- H�ndler reference -->
+        <xsl:variable name="paymentProcessReference" select="PaymentProcessReference"/> <!-- Händler reference -->
 
         <!-- InvoiceId/InvoiceReference -->
         <xsl:variable name="invoiceId">

@@ -14,6 +14,7 @@ import de.gzockoll.prototype.templates.entity.Template;
 import de.gzockoll.prototype.templates.entity.TemplateRepository;
 import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSource;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
+import de.gzockoll.prototype.templates.validation.XMLValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 import static java.lang.StrictMath.min;
 
@@ -94,9 +96,17 @@ public class TemplateViewModel implements View, OnDemandStreamSource {
             BeanItem item = (BeanItem) e.getItem();
             view.getGroup().setItemDataSource(item);
         });
-        view.getTransform().addValueChangeListener(e->
-                view.getEditor().setValue(new String(((Asset)e.getProperty().getValue()).getData()))
-        );
+        view.getTransform().addValueChangeListener(e-> {
+            Asset asset= (Asset) e.getProperty().getValue();
+            if (asset!=null) {
+                view.getEditor().setValue(new String(asset.getData()));
+            }
+        });
+        view.getNewButton().addClickListener(e-> {
+            view.getEditor().setValue("");
+            view.getGroup().setItemDataSource(new Template(Locale.getDefault().getLanguage()));
+        });
+        view.getEditor().addValidator(new XMLValidator());
     }
 
     public View getView() {
@@ -124,7 +134,7 @@ public class TemplateViewModel implements View, OnDemandStreamSource {
 
     @Override
     public InputStream getStream() {
-        Template t = templateItem.getBean();
+        Template t = view.getGroup().getItemDataSource().getBean();
         byte[] data = service.preview((String) view.getEditor().getValue(), t.getStationery());
         return new ByteArrayInputStream(data);
     }
