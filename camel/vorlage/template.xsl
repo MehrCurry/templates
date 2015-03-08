@@ -232,14 +232,6 @@
 
         <!-- fo Document starts here -->
         <fo:root>
-            <rx:meta-info>
-                <rx:meta-field name="author" value=""/>
-                <rx:meta-field name="creator" value=""/>
-                <rx:meta-field name="title" value=""/>
-                <rx:meta-field name="subject" value=""/>
-                <rx:meta-field name="keywords" value=""/>
-            </rx:meta-info>
-
             <fo:layout-master-set>
                 <fo:simple-page-master master-name="first-page" page-width="210mm" page-height="297mm" margin-left="23mm" margin-right="23mm" margin-bottom="3mm" margin-top="5mm">
                     <fo:region-body margin-bottom="20mm" margin-top="44mm"/>

@@ -13,4 +13,6 @@ public @interface ValidIXMLData {
     Class[] groups() default {};
 
     Class[] payload() default {};
+
+    String schemata() default "";
 }

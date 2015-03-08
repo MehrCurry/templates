@@ -1,5 +1,6 @@
 package de.gzockoll.prototype.templates.validation;
 
+import com.google.common.collect.ImmutableSet;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -18,14 +19,22 @@ import javax.xml.validation.Validator;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Created by Guido on 07.03.2015.
  */
 public class XMLValidator implements ConstraintValidator<ValidIXMLData, String>, com.vaadin.data.Validator {
+
+    private Set<String> schemata = Collections.emptySet();
+
     @Override
     public void initialize(ValidIXMLData validIXMLData) {
-
+        this.schemata = ImmutableSet.copyOf(validIXMLData.schemata().split(","));
     }
 
     public boolean isValid(String s) {
@@ -43,8 +52,14 @@ public class XMLValidator implements ConstraintValidator<ValidIXMLData, String>,
 
         // create a SchemaFactory capable of understanding WXS schemas
         SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-        Schema schema = factory.newSchema();
-
+        Object[] sources = schemata.stream().map(e -> {
+            try {
+                return new StreamSource(new URL(e).openStream());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }).toArray();
+        Schema schema=factory.newSchema();
         // create a Validator instance, which can be used to validate an instance document
         Validator validator = schema.newValidator();
 
