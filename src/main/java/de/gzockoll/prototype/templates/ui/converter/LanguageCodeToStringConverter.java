@@ -16,7 +16,10 @@ public class LanguageCodeToStringConverter implements Converter<String,LanguageC
 
     @Override
     public String convertToPresentation(LanguageCode languageCode, Class<? extends String> aClass, Locale locale) throws ConversionException {
-        return languageCode.getCode();
+        if (languageCode==null)
+            return "";
+        else
+            return languageCode.getCode();
     }
 
     @Override

@@ -1,11 +1,11 @@
 package de.gzockoll.prototype.templates.entity;
 
 import de.gzockoll.prototype.templates.validation.ValidISOLanguageCode;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import javax.persistence.Embeddable;
+import java.util.Locale;
 
 @Embeddable
 @EqualsAndHashCode @Getter
@@ -13,7 +13,8 @@ public class LanguageCode extends ValidateableObject {
     @ValidISOLanguageCode
     private String code;
 
-    private LanguageCode() {
+    public LanguageCode() {
+        this.code= Locale.getDefault().getLanguage();
     }
 
     public LanguageCode(@ValidISOLanguageCode String code) {

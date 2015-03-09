@@ -24,7 +24,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class Template extends AbstractEntity {
 
     @NotNull
-    private LanguageCode language;
+    private LanguageCode language=new LanguageCode();
 
     @OneToOne
     @NotNull
@@ -89,7 +89,7 @@ public class Template extends AbstractEntity {
     }
 
     public byte[] generate(ProducerTemplate producer, String data) {
-        checkState(isApproved(),"This template is not approved for document generation");
+        checkState(isApproved(), "This template is not approved for document generation");
             final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
                     .put("templateId", getTransform().getId())
                     .put("stationeryId", getStationery().getId())

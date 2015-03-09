@@ -1,83 +1,108 @@
 package de.gzockoll.prototype.templates.ui.components;
 
+import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
-import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.AbstractEntity;
+import de.gzockoll.prototype.templates.entity.Template;
+import lombok.Getter;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 
-/**
- * Created by Guido on 09.03.2015.
- */
+@Getter
 public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
-    private static final Action ACTION_ADD = new Action("Add");
-    private static final Action ACTION_DELETE = new Action("Delete");
     private final Class clazz;
-    private int id = 0;
+    private final Table table;
+    private Map<String, Field> fields=new HashMap<>();
     private BeanItemContainer<T> container;
+    private Button commitButton=new Button("Speichern");
+    private FieldGroup fieldGroup;
+    private Component detailForm;
+    private Object item;
+    private Map<String,Container> containerMap = new HashMap<>();
 
     public CRUD(Class clazz) {
         this.clazz=clazz;
         container=new BeanItemContainer<T>(clazz);
+        this.table=createTable(container);
+        setFirstComponent(table);
     }
 
-    private Component createTable(BeanItemContainer<T> container) {
+    private Table createTable(BeanItemContainer<T> container) {
         Table table=new Table(null,container);
         table.setSelectable(true);
         table.setSizeFull();
-        table.addItemClickListener(e-> {
-            if (MouseEventDetails.MouseButton.LEFT.getName().equals(e.getButtonName())) {
-                setSecondComponent(createForm(e.getItem()));
-            }
-        });
-        table.addActionHandler(new Action.Handler() {
-            @Override
-            public Action[] getActions(Object o, Object o1) {
-                return new Action[0];
-            }
-
-            @Override
-            public void handleAction(Action action, Object sender, Object target) {
-                if (ACTION_DELETE == action) {
-                    container.removeItem(target);
-                }
-                if (ACTION_ADD == action) {
-                    try {
-                        container.addBean((T) clazz.newInstance());
-                    } catch (IllegalAccessException | InstantiationException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+        table.addValueChangeListener(e -> {
+            Table t= (Table) e.getProperty();
+            Object value = t.getValue();
+            BeanItem<Template> bt= (BeanItem<Template>) t.getContainerDataSource().getItem(value);
+            setItem(bt);
         });
         return table;
     }
 
     private Component createForm(Item item) {
+        checkArgument(item!=null);
         FormLayout layout = new FormLayout();
-        layout.setSpacing(true);
+        layout.setSpacing(false);
         layout.setMargin(true);
-        FieldGroup group = new FieldGroup(item);
-        group.setFieldFactory(new CustomFieldFactory());
-        group.getUnboundPropertyIds().forEach(p ->
-                layout.addComponent(group.buildAndBind(p)));
-        Button button = new Button(("Commit"));
-        button.addClickListener(e -> {
-            try {
-                group.commit();
-            } catch (FieldGroup.CommitException ex) {
-                Notification.show(ex.getCause().getMessage(), Notification.Type.ERROR_MESSAGE);
+        fieldGroup = new FieldGroup(item);
+        fieldGroup.setFieldFactory(new CustomFieldFactory());
+        fieldGroup.getUnboundPropertyIds().forEach(p -> {
+            final Field field = fieldGroup.buildAndBind(p);
+            fields.put((String) p,field);
+            if (containerMap.containsKey(p)) {
+                ((AbstractSelect)field).setContainerDataSource(containerMap.get(p));
             }
+            layout.addComponent(field);
         });
-        layout.addComponent(button);
+        layout.addComponent(commitButton);
         return layout;
     }
 
+    public void commit() {
+        try {
+            fieldGroup.commit();
+        } catch (FieldGroup.CommitException e) {
+            Notification.show(e.getCause().getMessage(), Notification.Type.ERROR_MESSAGE);
+        }
+    }
     public void setContainer(BeanItemContainer<T> container) {
-        this.container=container;
-        setFirstComponent(createTable(container));
+        table.setContainerDataSource(container);
+    }
+
+    public void setItem(Item item) {
+        if (item!=null) {
+            if (fieldGroup == null) {
+                detailForm = createForm(item);
+                setSecondComponent(detailForm);
+            }
+            fieldGroup.setItemDataSource(item);
+        }
+    }
+
+    public Optional<? extends Field> getField(String property) {
+        return Optional.ofNullable(fields.get(property));
+    }
+
+    public void addActionHandler(Action.Handler handler) {
+        table.addActionHandler(handler);
+    }
+
+    public void addDatasourceForProperty(String key,Container container) {
+        containerMap.put(key, container);
+    }
+
+    public T getBean() {
+        return (T) table.getValue();
     }
 }
