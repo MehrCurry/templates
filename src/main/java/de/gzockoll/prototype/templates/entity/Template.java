@@ -20,11 +20,24 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
-@Entity @EqualsAndHashCode(callSuper = false) @ToString @Getter @Setter
+@Entity
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Getter
+@Setter
 public class Template extends AbstractEntity {
+    public static String DATA;
+
+    static {
+        try {
+            DATA = new String(Files.readAllBytes(Paths.get("camel/vorlage/dataset.xml")), Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @NotNull
-    private LanguageCode language=new LanguageCode();
+    private LanguageCode language = new LanguageCode();
 
     @OneToOne
     @NotNull
@@ -45,55 +58,58 @@ public class Template extends AbstractEntity {
         this.language = language;
     }
 
-    private TemplateState state=TemplateState.EDITABLE;
+    private TemplateState state = TemplateState.EDITABLE;
 
     public Template requestApproval() {
         Preconditions.checkState(assetsPresent());
-        state=state.requestApproval();
+        state = state.requestApproval();
         return this;
     }
 
     private boolean assetsPresent() {
-        return transform!=null && stationery !=null;
+        return transform != null && stationery != null;
     }
 
     public boolean isApproved() {
-        return state==TemplateState.APPROVED;
+        return state == TemplateState.APPROVED;
     }
 
     public Template approve() {
         Preconditions.checkState(assetsPresent());
-        state=state.approve();
+        state = state.approve();
         return this;
     }
 
     public Template assignTransform(Asset a) {
         Preconditions.checkNotNull(a);
-        state=state.assignTransform(this, a);
+        state = state.assignTransform(this, a);
         return this;
     }
 
     public Template assignStationary(Asset a) {
         Preconditions.checkNotNull(a);
-        state=state.assignStationary(this, a);
+        state = state.assignStationary(this, a);
         return this;
     }
 
     public byte[] generate(ProducerTemplate producer) {
-        try {
-            String data = new String(Files.readAllBytes(Paths.get("camel/vorlage/dataset.xml")), Charset.forName("UTF-8"));
-            return generate(producer,data);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return generate(producer, DATA);
     }
 
     public byte[] generate(ProducerTemplate producer, String data) {
         checkState(isApproved(), "This template is not approved for document generation");
-            final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
-                    .put("templateId", getTransform().getId())
-                    .put("stationeryId", getStationery().getId())
-                    .build();
-            return (byte[]) producer.requestBodyAndHeaders(data, headers);
+        return preview(producer, data);
+    }
+
+    public byte[] preview(ProducerTemplate producer, String data) {
+        final Map<String, Object> headers = ImmutableMap.<String, Object>builder()
+                .put("templateId", getTransform().getId())
+                .put("stationeryId", getStationery().getId())
+                .build();
+        return (byte[]) producer.requestBodyAndHeaders(data, headers);
+    }
+
+    public byte[] preview(ProducerTemplate producer) {
+        return preview(producer,DATA);
     }
 }

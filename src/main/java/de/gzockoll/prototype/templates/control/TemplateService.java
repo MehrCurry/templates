@@ -57,6 +57,9 @@ public class TemplateService {
     public byte[] generate(Template t) {
         return t.generate(producer);
     }
+    public byte[] preview(Template t) {
+        return t.preview(producer);
+    }
 
     public byte[] preview(String xslt,Asset stationery) {
         Path tmpFile=null;
@@ -76,5 +79,4 @@ public class TemplateService {
                 tmpFile.toFile().delete();
         }
     }
-
 }

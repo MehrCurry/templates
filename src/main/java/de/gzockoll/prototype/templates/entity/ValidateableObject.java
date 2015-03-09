@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by Guido on 09.03.2015.
  */
-public class ValidateableObject {
+public abstract class ValidateableObject {
     private static final Validator VALIDATOR= Validation.buildDefaultValidatorFactory().getValidator();
 
     public Set<ConstraintViolation<ValidateableObject>> validationErrors() {

@@ -7,7 +7,9 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.ui.Button;
+import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
+import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
@@ -52,18 +54,12 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
     private TemplateService service;
 
     private BeanItemContainer<Template> templateContainer = new BeanItemContainer<Template>(Template.class);
-    private BeanItem<Template> templateItem = new BeanItem<>(new Template("de"));
     private BeanItemContainer<Asset> xslContainer = new BeanItemContainer<Asset>(Asset.class);
     private BeanItemContainer<Asset> pdfContainer = new BeanItemContainer<Asset>(Asset.class);
 
     @PostConstruct
     public void init() {
         bind();
-    }
-
-    public void refreshTable() {
-        templateContainer.removeAllItems();
-        templateContainer.addAll(repository.findAll());
     }
 
     public void bind() {
@@ -85,11 +81,10 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
         try {
             view.commit();
             BeanItem<Template> item = (BeanItem<Template>) view.getCurrentItem();
-            if (templateContainer.containsId(item)) {
-                templateContainer.removeItem(item);
-            }
             Template newBean = repository.save(item.getBean());
-            templateContainer.addItem(getTemplateBeanItem(newBean));
+            if (!templateContainer.containsId(item.getBean())) {
+                templateContainer.addItem(newBean);
+            }
         } catch (IllegalStateException ex) {
             handleError(ex);
         }
@@ -144,11 +139,25 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
                 templateContainer.removeItem(target);
             }
         }
+        if (ACTION_PREVIEW==action) {
+            showPDF(service.preview((Template) target));
+        }
     }
 
     private BeanItem<Template> getTemplateBeanItem(Template justCreated) {
         final BeanItem<Template> item = new BeanItem<Template>(justCreated);
         HIDDEN_FIELDS.forEach(f -> item.removeItemProperty(f));
         return item;
+    }
+
+    private void showPDF(byte[] data) {
+        Resource resource=new StreamResource(() -> new ByteArrayInputStream(data),"preview.pdf");
+        BrowserFrame frame=new BrowserFrame("Preview",resource);
+        frame.setSizeFull();
+        Window subWindow=new Window("Preview");
+        subWindow.setWidth("50%");
+        subWindow.setHeight("100%");
+        subWindow.setContent(frame);
+        UI.getCurrent().addWindow(subWindow);
     }
 }
