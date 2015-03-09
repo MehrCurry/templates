@@ -43,7 +43,7 @@ public class ISOLanguageCodeValidatorTest {
         customer.setLastname("");
         customer.setLanguage("--");
 
-        assertThat(customer.getValidationErrors()).hasSize(2);
+        assertThat(customer.validationErrors()).hasSize(2);
 
     }
 

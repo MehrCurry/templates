@@ -2,7 +2,6 @@ package de.gzockoll.prototype.templates.entity;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.thirdparty.guava.common.base.Preconditions;
-import de.gzockoll.prototype.templates.validation.ValidISOLanguageCode;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -26,8 +24,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class Template extends AbstractEntity {
 
     @NotNull
-    @ValidISOLanguageCode
-    private String language;
+    private LanguageCode language;
 
     @OneToOne
     @NotNull
@@ -40,7 +37,11 @@ public class Template extends AbstractEntity {
     public Template() {
     }
 
-    public Template(@Size(min = 2, max = 2) String language) {
+    public Template(String isoLanguage) {
+        this.language = new LanguageCode(isoLanguage);
+    }
+
+    public Template(LanguageCode language) {
         this.language = language;
     }
 

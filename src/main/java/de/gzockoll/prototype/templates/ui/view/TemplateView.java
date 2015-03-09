@@ -8,9 +8,15 @@ import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.Template;
+import de.gzockoll.prototype.templates.ui.components.CRUD;
+import de.gzockoll.prototype.templates.ui.components.GenericBeanForm;
+import de.gzockoll.prototype.templates.ui.components.LanguageCodeField;
 import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSourceProxy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.tylproject.vaadin.addon.datanav.ButtonBar;
+import org.tylproject.vaadin.addon.datanav.NavigationLabel;
+import org.tylproject.vaadin.addon.fieldbinder.FieldBinder;
 import org.vaadin.spring.annotation.VaadinUIScope;
 import org.vaadin.spring.navigator.annotation.VaadinView;
 
@@ -24,7 +30,7 @@ public class TemplateView extends CustomComponent implements View {
     private Table table=new Table();
     private Button previewButton =new Button("Preview");
     private Button saveButton=new Button("Save");
-    private TextField language=new TextField("Language");
+    private LanguageCodeField language=new LanguageCodeField("Language");
     private ComboBox transform=new ComboBox("XSL Transformer");
     private ComboBox stationery = new ComboBox("Stationery");
     private View viewChangeListener;
@@ -34,6 +40,8 @@ public class TemplateView extends CustomComponent implements View {
     private OnDemandStreamSourceProxy streamSource=new OnDemandStreamSourceProxy();
     private BrowserWindowOpener browserWindowOpener=new BrowserWindowOpener(new StreamResource(streamSource,"preview.pdf"));
     private Button newButton=new Button("Neu");
+    private FieldBinder<Template> binder= new FieldBinder<Template>(Template.class);
+    private CRUD<Template> crud=new CRUD<Template>(Template.class);
 
     @PostConstruct
     public void init() {
@@ -57,6 +65,8 @@ public class TemplateView extends CustomComponent implements View {
         browserWindowOpener.extend(previewButton);
 
         mainLayout.addComponent(left);
+        left.addComponent(new GenericBeanForm<Template>(Template.class));
+        left.addComponent(crud);
         setCompositionRoot(mainLayout);
     }
 

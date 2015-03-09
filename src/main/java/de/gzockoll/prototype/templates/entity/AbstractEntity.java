@@ -15,8 +15,7 @@ import java.util.Set;
 
 @MappedSuperclass
 @Getter
-public abstract class AbstractEntity {
-    private static final Validator VALIDATOR= Validation.buildDefaultValidatorFactory().getValidator();
+public abstract class AbstractEntity extends ValidateableObject {
 
     @Id
     @GeneratedValue
@@ -26,20 +25,4 @@ public abstract class AbstractEntity {
     private long version;
 
     final private Date createdAt = new Date();
-
-    public Set<ConstraintViolation<AbstractEntity>> getValidationErrors() {
-        return VALIDATOR.validate(this);
-    }
-
-    public boolean isValid() {
-        return getValidationErrors().size()==0;
-    }
-
-    public void validate() throws ConstraintViolationException {
-        Set<ConstraintViolation<AbstractEntity>> errors = getValidationErrors();
-        if (errors.size()>0) {
-            throw new ConstraintViolationException("Validation",errors);
-        }
-
-    }
 }

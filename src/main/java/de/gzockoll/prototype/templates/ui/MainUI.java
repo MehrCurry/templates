@@ -9,6 +9,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
+import de.gzockoll.prototype.templates.ui.converter.ConverterFactory;
 import de.gzockoll.prototype.templates.ui.viewmodel.AssetViewModel;
 import de.gzockoll.prototype.templates.ui.viewmodel.TemplateViewModel;
 import lombok.Data;
@@ -47,6 +48,7 @@ public class MainUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
         Preconditions.checkState(assetRepository!=null);
+        VaadinSession.getCurrent().setConverterFactory(new ConverterFactory());
         if (request.getParameter("test") != null) {
             testMode = true;
 

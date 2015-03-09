@@ -106,7 +106,9 @@ public class TemplateViewModel implements View, OnDemandStreamSource {
             view.getEditor().setValue("");
             view.getGroup().setItemDataSource(new Template(Locale.getDefault().getLanguage()));
         });
-        view.getEditor().addValidator(new XMLValidator());
+        // view.getEditor().addValidator(new XMLValidator("http://www.w3.org/2007/schema-for-xslt20.xsd","http://svn.apache.org/repos/asf/xmlgraphics/fop/trunk/src/foschema/fop.xsd"));
+        view.getBinder().setBeanDataSource(new Template());
+        view.getCrud().setContainer(templateContainer);
     }
 
     public View getView() {
