@@ -81,10 +81,15 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
         try {
             view.commit();
             BeanItem<Template> item = (BeanItem<Template>) view.getCurrentItem();
+            if (item.getBean().getId()!=null) {
+                Template oldTemplate = repository.findOne(item.getBean().getId());
+                templateContainer.removeItem(oldTemplate);
+            }
             Template newBean = repository.save(item.getBean());
             if (!templateContainer.containsId(item.getBean())) {
                 templateContainer.addItem(newBean);
             }
+            view.setItem(templateContainer.getItem(newBean));
         } catch (IllegalStateException ex) {
             handleError(ex);
         }
