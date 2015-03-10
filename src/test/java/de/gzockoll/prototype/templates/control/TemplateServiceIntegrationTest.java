@@ -2,6 +2,7 @@ package de.gzockoll.prototype.templates.control;
 
 import de.gzockoll.prototype.templates.TemplatesApplication;
 import de.gzockoll.prototype.templates.entity.*;
+import de.gzockoll.prototype.templates.validation.PDFHelper;
 import org.apache.tika.Tika;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,7 @@ public class TemplateServiceIntegrationTest {
 
     @Test
     public void testGroup() {
-        Asset anAsset=new Asset("JUnit".getBytes(),"junit.txt");
+        Asset anAsset=new Asset(PDFHelper.getValidPDFContent(),"junit.txt");
         assets.save(anAsset);
         Template t=new Template("de").assignTransform(anAsset).assignStationary(anAsset);
         TemplateGroup group = service.addTemplate(1, "de", "junit", t);
@@ -47,7 +48,7 @@ public class TemplateServiceIntegrationTest {
     @Test
     public void testDetachedApproval() {
         Template t = new Template("de");
-        final Asset a = new Asset("junit".getBytes(),"junit.txt");
+        final Asset a = new Asset(PDFHelper.getValidPDFContent(),"junit.txt");
         assets.save(a);
         t.assignTransform(a).assignStationary(a).requestApproval().approve();
         service.updateTemplate(t);

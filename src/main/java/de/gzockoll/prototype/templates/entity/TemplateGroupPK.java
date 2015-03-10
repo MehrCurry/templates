@@ -9,16 +9,16 @@ import java.io.Serializable;
 @Embeddable @EqualsAndHashCode @ToString
 public class TemplateGroupPK implements Serializable {
     private long tenantId;
-    private String language;
+    private LanguageCode languageCode;
     private String qualifier;
 
     private TemplateGroupPK() {
 
     }
 
-    public TemplateGroupPK(long tenantId, String language, String qualifier) {
+    public TemplateGroupPK(long tenantId, LanguageCode languageCode, String qualifier) {
         this.tenantId = tenantId;
-        this.language = language;
+        this.languageCode = languageCode;
         this.qualifier = qualifier;
     }
 
@@ -26,8 +26,8 @@ public class TemplateGroupPK implements Serializable {
         return tenantId;
     }
 
-    public String getLanguage() {
-        return language;
+    public LanguageCode getLanguageCode() {
+        return languageCode;
     }
 
     public String getQualifier() {

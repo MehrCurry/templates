@@ -3,7 +3,9 @@ package de.gzockoll.prototype.templates.validation;
 import com.google.common.collect.ImmutableSet;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -75,7 +77,11 @@ public class XMLValidator implements ConstraintValidator<ValidIXMLData, String>,
     }
 
     public void validate(String s) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(true);
+        DocumentBuilder parser = factory.newDocumentBuilder();
+        parser.setErrorHandler(new SimpleErrorHandler());
         Document document = parser.parse(new ByteArrayInputStream(s.getBytes()));
         validator.validate(new DOMSource(document));
     }
@@ -100,5 +106,22 @@ public class XMLValidator implements ConstraintValidator<ValidIXMLData, String>,
         }
     }
 
+    private static class SimpleErrorHandler implements ErrorHandler {
 
+        @Override
+        public void warning(SAXParseException exception) throws SAXException {
+            log.warn("Warning: " + exception);
+        }
+
+        @Override
+        public void error(SAXParseException exception) throws SAXException {
+            log.error("Error: " + exception);
+
+        }
+
+        @Override
+        public void fatalError(SAXParseException exception) throws SAXException {
+            log.error("Fatal: " + exception);
+        }
+    }
 }

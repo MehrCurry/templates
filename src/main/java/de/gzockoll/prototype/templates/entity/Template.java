@@ -2,6 +2,7 @@ package de.gzockoll.prototype.templates.entity;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.thirdparty.guava.common.base.Preconditions;
+import de.gzockoll.prototype.templates.validation.PDFDocument;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +38,7 @@ public class Template extends AbstractEntity {
     }
 
     @NotNull
-    private LanguageCode language = new LanguageCode();
+    private LanguageCode languageCode = new LanguageCode();
 
     @OneToOne
     @NotNull
@@ -45,17 +46,18 @@ public class Template extends AbstractEntity {
 
     @ManyToOne
     @NotNull
+    @PDFDocument
     private Asset stationery;
 
     public Template() {
     }
 
     public Template(String isoLanguage) {
-        this.language = new LanguageCode(isoLanguage);
+        this.languageCode = new LanguageCode(isoLanguage);
     }
 
     public Template(LanguageCode language) {
-        this.language = language;
+        this.languageCode = language;
     }
 
     private TemplateState state = TemplateState.EDITABLE;

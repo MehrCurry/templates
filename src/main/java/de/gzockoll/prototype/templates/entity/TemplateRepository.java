@@ -8,5 +8,5 @@ import java.util.List;
 @Repository
 public interface TemplateRepository extends JpaRepository<Template, Long> {
 
-    public List<Template> findByLanguage(String language);
+    public List<Template> findByLanguageCode(String language);
 }

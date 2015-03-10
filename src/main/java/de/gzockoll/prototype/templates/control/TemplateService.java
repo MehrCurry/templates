@@ -41,7 +41,7 @@ public class TemplateService {
 
     public TemplateGroup addTemplate(long tenantId, String language, String qualifier, Template t) {
         repository.save(t);
-        TemplateGroupPK pk = new TemplateGroupPK(tenantId, language, qualifier);
+        TemplateGroupPK pk = new TemplateGroupPK(tenantId, new LanguageCode(language), qualifier);
         TemplateGroup group = groupRepository.findOne(pk);
         if (group==null) {
             group=new TemplateGroup(tenantId,language, qualifier);

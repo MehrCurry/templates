@@ -7,7 +7,6 @@ import lombok.ToString;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 
 @Entity @EqualsAndHashCode @ToString
@@ -24,11 +23,11 @@ public class TemplateGroup {
     private TemplateGroup() {};
 
     public TemplateGroup(long tenantId,String language, String qualifier) {
-        this.id=new TemplateGroupPK(tenantId,language,qualifier);
+        this.id=new TemplateGroupPK(tenantId,new LanguageCode(language),qualifier);
     }
 
     public void addTemplate(Template t) {
-        Preconditions.checkArgument(hasSameLanguageAs(t));
+        Preconditions.checkArgument(hasSameLanguageAs(t),"Language mismatch: " + id.getLanguageCode() + "<>" + t.getLanguageCode());
         templates.add(t);
     }
 
@@ -44,6 +43,6 @@ public class TemplateGroup {
 
     public boolean hasSameLanguageAs(Template t) {
         Preconditions.checkNotNull(t);
-        return t.getLanguage().equals(id.getLanguage());
+        return t.getLanguageCode().equals(id.getLanguageCode());
     }
 }
