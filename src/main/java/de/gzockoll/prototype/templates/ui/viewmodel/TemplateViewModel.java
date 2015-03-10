@@ -9,12 +9,16 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.*;
+import com.vaadin.ui.BrowserFrame;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
 import de.gzockoll.prototype.templates.entity.Template;
 import de.gzockoll.prototype.templates.entity.TemplateRepository;
+import de.gzockoll.prototype.templates.ui.components.CommandAction;
 import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSource;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +43,7 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
     private static final Charset UTF_8 = Charset.forName("UTF-8");
     public static final String MIME_TYPE_PDF = MediaType.PDF.toString();
     public static final String MIME_TYPE_XSLT = "application/xslt+xml";
-    public static final ImmutableSet<String> HIDDEN_FIELDS = ImmutableSet.of("id", "version", "state","valid","approved");
+    public static final ImmutableSet<String> HIDDEN_FIELDS = ImmutableSet.of("id", "version", "valid", "approved");
 
     @Autowired
     private TemplateRepository repository;
@@ -122,25 +126,30 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
 
     @Override
     public Action[] getActions(Object target, Object sender) {
-        return new Action[] {ACTION_ADD,ACTION_DELETE, ACTION_PREVIEW};
+        return new Action[] {
+                new CommandAction("Add", (s,t) -> {
+                    Template justCreated = new Template();
+                    final BeanItem<Template> item = getTemplateBeanItem(justCreated);
+                    view.editItem(item);
+                    return null;
+                }),
+                new CommandAction("Delete", (s,t) -> {
+                    if (target!=null) {
+                        repository.delete((Template) t);
+                        templateContainer.removeItem(t);
+                    }
+                    return null;
+                }),
+                new CommandAction("Preview", (s,t) -> {
+                    showPDF(service.preview((Template) t));
+                    return null;
+                })};
     }
 
     @Override
-    public void handleAction(Action action, Object sender, Object target) {
-        if (ACTION_ADD==action) {
-            Template justCreated = new Template();
-            final BeanItem<Template> item = getTemplateBeanItem(justCreated);
-            view.editItem(item);
-        }
-        if (ACTION_DELETE==action) {
-            if (target!=null) {
-                repository.delete((Template) target);
-                templateContainer.removeItem(target);
-            }
-        }
-        if (ACTION_PREVIEW==action) {
-            showPDF(service.preview((Template) target));
-        }
+    public void handleAction(Action a, Object sender, Object target) {
+        CommandAction action= (CommandAction) a;
+        action.handle(sender, target);
     }
 
     private BeanItem<Template> getTemplateBeanItem(Template justCreated) {

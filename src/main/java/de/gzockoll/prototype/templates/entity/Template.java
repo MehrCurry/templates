@@ -1,7 +1,9 @@
 package de.gzockoll.prototype.templates.entity;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.gwt.thirdparty.guava.common.base.Preconditions;
+import de.gzockoll.prototype.templates.util.Command;
 import de.gzockoll.prototype.templates.validation.PDFDocument;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -113,5 +116,12 @@ public class Template extends AbstractEntity {
 
     public byte[] preview(ProducerTemplate producer) {
         return preview(producer,DATA);
+    }
+
+    public Collection<Command> commands() {
+        return ImmutableSet.of(
+                new Command("Request Approval", () -> this.requestApproval()),
+                new Command("Approve", () -> this.approve())
+                );
     }
 }

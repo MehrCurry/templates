@@ -9,8 +9,10 @@ import com.vaadin.event.Action;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.AbstractEntity;
 import de.gzockoll.prototype.templates.entity.Template;
+import de.gzockoll.prototype.templates.util.Command;
 import lombok.Getter;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,12 +28,14 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
     private BeanItemContainer<T> container;
     private Button commitButton=new Button("Speichern");
     private FieldGroup fieldGroup;
-    private Component detailForm;
+    private FormLayout detailForm;
     private Object item;
     private Map<String,Container> containerMap = new HashMap<>();
+    private ButtonBar buttonBar;
 
     public CRUD(Class clazz) {
         this.clazz=clazz;
+
         container=new BeanItemContainer<T>(clazz);
         this.table=createTable(container);
         setFirstComponent(table);
@@ -50,7 +54,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
         return table;
     }
 
-    private Component createForm(Item item) {
+    private FormLayout createForm(Item item) {
         checkArgument(item!=null);
         FormLayout layout = new FormLayout();
         layout.setSpacing(false);
@@ -87,6 +91,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
                 setSecondComponent(detailForm);
             }
             fieldGroup.setItemDataSource(item);
+
         }
     }
 
@@ -104,5 +109,13 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
 
     public T getBean() {
         return (T) table.getValue();
+    }
+
+    public void addCommandButtons(Collection<Command> commands) {
+        if (buttonBar!=null) {
+            detailForm.removeComponent(buttonBar);
+        }
+        detailForm.addComponent(new ButtonBar(commands));
+
     }
 }

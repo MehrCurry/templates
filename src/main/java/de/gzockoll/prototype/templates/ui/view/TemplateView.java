@@ -11,6 +11,7 @@ import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.Template;
+import de.gzockoll.prototype.templates.ui.components.ButtonBar;
 import de.gzockoll.prototype.templates.ui.components.CRUD;
 import de.gzockoll.prototype.templates.ui.components.GenericBeanForm;
 import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSourceProxy;
@@ -32,13 +33,14 @@ public class TemplateView extends CustomComponent implements View {
     private BrowserWindowOpener browserWindowOpener=new BrowserWindowOpener(new StreamResource(streamSource,"preview.pdf"));
     private Button newButton=new Button("Neu");
     private CRUD<Template> crud=new CRUD<Template>(Template.class);
+    private ButtonBar buttonBar;
+    private final VerticalLayout left = new VerticalLayout();
 
     @PostConstruct
     public void init() {
         HorizontalLayout mainLayout=new HorizontalLayout();
         mainLayout.setSizeFull();
         mainLayout.setMargin(true);
-        VerticalLayout left=new VerticalLayout();
         left.setSizeFull();
 
         left.addComponent(editor);
@@ -65,11 +67,8 @@ public class TemplateView extends CustomComponent implements View {
 
     public void setItem(BeanItem<Template> item) {
         crud.setItem(item);
-    }
+        crud.addCommandButtons(item.getBean().commands());
 
-    public void update(Item item) {
-        crud.getTable().getContainerDataSource().removeItem(item);
-        crud.getTable().getContainerDataSource().addItem(item);
     }
 
     public void select(Template aTemplate) {
