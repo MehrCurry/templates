@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.lang.annotation.Target;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -28,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 @EqualsAndHashCode(callSuper = false)
 @ToString
 @Getter
-@Setter
 public class Template extends AbstractEntity {
     public static String DATA;
 
@@ -41,15 +41,18 @@ public class Template extends AbstractEntity {
     }
 
     @NotNull
+    @Setter
     private LanguageCode languageCode = new LanguageCode();
 
     @OneToOne
     @NotNull
+    @Setter
     private Asset transform;
 
     @ManyToOne
     @NotNull
     @PDFDocument
+    @Setter
     private Asset stationery;
 
     public Template() {
@@ -118,10 +121,10 @@ public class Template extends AbstractEntity {
         return preview(producer,DATA);
     }
 
-    public Collection<Command> commands() {
+    public Collection<Command<Template>> commands() {
         return ImmutableSet.of(
-                new Command("Request Approval", () -> this.requestApproval()),
-                new Command("Approve", () -> this.approve())
-                );
+                new Command<Template>("Request Approval", this, () -> this.requestApproval()),
+                new Command<Template>("Approve", this, () -> this.approve())
+        );
     }
 }

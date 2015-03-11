@@ -12,10 +12,7 @@ import de.gzockoll.prototype.templates.entity.Template;
 import de.gzockoll.prototype.templates.util.Command;
 import lombok.Getter;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -31,7 +28,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
     private FormLayout detailForm;
     private Object item;
     private Map<String,Container> containerMap = new HashMap<>();
-    private ButtonBar buttonBar;
+    private ButtonBar buttonBar=new ButtonBar(Collections.EMPTY_LIST);
 
     public CRUD(Class clazz) {
         this.clazz=clazz;
@@ -70,6 +67,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
             layout.addComponent(field);
         });
         layout.addComponent(commitButton);
+        layout.addComponent(buttonBar);
         return layout;
     }
 
@@ -84,7 +82,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
         table.setContainerDataSource(container);
     }
 
-    public void setItem(Item item) {
+    public void setItem(BeanItem<Template> item) {
         if (item!=null) {
             if (fieldGroup == null) {
                 detailForm = createForm(item);
@@ -112,10 +110,6 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
     }
 
     public void addCommandButtons(Collection<Command> commands) {
-        if (buttonBar!=null) {
-            detailForm.removeComponent(buttonBar);
-        }
-        detailForm.addComponent(new ButtonBar(commands));
-
+        buttonBar.replaceCommands(commands);
     }
 }

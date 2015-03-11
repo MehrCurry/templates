@@ -7,32 +7,20 @@ import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkState;
 
-/**
- * Created by Guido.Zockoll on 10.03.2015.
- */
-public class CommandAction<TARGET,RETURN> extends Action implements BiFunction<Object,TARGET,RETURN> {
-    private BiFunction<Object,TARGET,RETURN> function;
+public class CommandAction<TARGET> extends Action {
+    private final Operation<TARGET> operation;
 
-    public CommandAction(String name, BiFunction<Object, TARGET, RETURN> function) {
+    public CommandAction(String name,Operation<TARGET> operation) {
         super(name);
-        this.function = function;
+        this.operation=operation;
     }
 
-    public CommandAction(String name, Command command) {
-        super(name);
-        function= (s, t) -> {
-            command.run();
-            return null;
-        };
+    public void handle(Object t, Object u) {
+        checkState(operation!=null);
+        operation.apply(t, (TARGET) u);
     }
 
-    @Override
-    public RETURN apply(Object t, Object u) {
-        checkState(function!=null);
-        return function.apply(t, (TARGET) u);
-    }
-
-    public void handle(Object sender, Object target) {
-        apply(sender,target);
+    public static interface Operation<T> {
+        void apply(Object source,T target);
     }
 }

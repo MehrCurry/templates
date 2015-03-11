@@ -15,12 +15,14 @@ import de.gzockoll.prototype.templates.ui.components.ButtonBar;
 import de.gzockoll.prototype.templates.ui.components.CRUD;
 import de.gzockoll.prototype.templates.ui.components.GenericBeanForm;
 import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSourceProxy;
+import de.gzockoll.prototype.templates.util.Command;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.vaadin.spring.annotation.VaadinUIScope;
 import org.vaadin.spring.navigator.annotation.VaadinView;
 
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 
 @VaadinUIScope
 @Getter
@@ -67,8 +69,6 @@ public class TemplateView extends CustomComponent implements View {
 
     public void setItem(BeanItem<Template> item) {
         crud.setItem(item);
-        crud.addCommandButtons(item.getBean().commands());
-
     }
 
     public void select(Template aTemplate) {
@@ -106,5 +106,9 @@ public class TemplateView extends CustomComponent implements View {
     public Item getCurrentItem() {
         return crud.getFieldGroup().getItemDataSource();
 
+    }
+
+    public void addCommandButtons(Collection<Command> commands) {
+         crud.addCommandButtons(commands);;
     }
 }

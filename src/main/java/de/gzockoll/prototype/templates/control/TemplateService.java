@@ -2,6 +2,7 @@ package de.gzockoll.prototype.templates.control;
 
 import com.google.common.collect.ImmutableMap;
 import de.gzockoll.prototype.templates.entity.*;
+import de.gzockoll.prototype.templates.util.Command;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
@@ -14,7 +15,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Transactional
 @Controller
@@ -78,5 +81,13 @@ public class TemplateService {
             if (tmpFile!=null)
                 tmpFile.toFile().delete();
         }
+    }
+    public void execute(Command<Template> command) {
+        command.run();
+        repository.save(command.getTarget());
+    }
+
+    public Collection<Command> getCommands(Template t) {
+        return t.commands().stream().map(c -> new Command(c.getName(), this, () -> this.execute(c))).collect(Collectors.toList());
     }
 }
