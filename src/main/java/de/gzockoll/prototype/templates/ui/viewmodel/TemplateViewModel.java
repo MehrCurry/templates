@@ -150,6 +150,7 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
     public void handleAction(Action a, Object sender, Object target) {
         CommandAction action= (CommandAction) a;
         action.handle(sender, target);
+        refresh();
     }
 
     private BeanItem<Template> getTemplateBeanItem(Template justCreated) {

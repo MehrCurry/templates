@@ -47,6 +47,9 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
             Object value = t.getValue();
             BeanItem<Template> bt= (BeanItem<Template>) t.getContainerDataSource().getItem(value);
             setItem(bt);
+            // Collection<Command<Template>> commands = bt.getBean().commands();
+            // Collection<Command<? extends Template>> hurz=commands;
+            //buttonBar.replaceCommands(commands);
         });
         return table;
     }
@@ -109,7 +112,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
         return (T) table.getValue();
     }
 
-    public void addCommandButtons(Collection<Command> commands) {
-        buttonBar.replaceCommands(commands);
+    public void addCommandButtons(Collection<Command<? extends AbstractEntity>> commands) {
+        // buttonBar.replaceCommands(commands);
     }
 }
