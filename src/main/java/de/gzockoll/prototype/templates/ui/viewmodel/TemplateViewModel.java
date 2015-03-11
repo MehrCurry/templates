@@ -21,6 +21,7 @@ import de.gzockoll.prototype.templates.entity.TemplateRepository;
 import de.gzockoll.prototype.templates.ui.components.CommandAction;
 import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSource;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
+import de.gzockoll.prototype.templates.util.Command;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Collection;
 
 import static de.gzockoll.prototype.templates.ui.util.ErrorHandler.handleError;
 
@@ -88,6 +90,7 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
             Template newBean = repository.save(item.getBean());
             refresh();
             view.setItem(templateContainer.getItem(newBean));
+            view.addCommandButtons(service.getCommands(newBean));
         } catch (IllegalStateException ex) {
             handleError(ex);
         }
@@ -127,22 +130,19 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
     @Override
     public Action[] getActions(Object target, Object sender) {
         return new Action[] {
-                new CommandAction("Add", (s,t) -> {
+                new CommandAction<Template>("Add", (s,t) -> {
                     Template justCreated = new Template();
                     final BeanItem<Template> item = getTemplateBeanItem(justCreated);
                     view.editItem(item);
-                    return null;
                 }),
-                new CommandAction("Delete", (s,t) -> {
+                new CommandAction<Template>("Delete", (s,t) -> {
                     if (target!=null) {
-                        repository.delete((Template) t);
+                        repository.delete(t);
                         templateContainer.removeItem(t);
                     }
-                    return null;
                 }),
-                new CommandAction("Preview", (s,t) -> {
-                    showPDF(service.preview((Template) t));
-                    return null;
+                new CommandAction<Template>("Preview", (s,t) -> {
+                    showPDF(service.preview(t));
                 })};
     }
 
@@ -155,6 +155,7 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
     private BeanItem<Template> getTemplateBeanItem(Template justCreated) {
         final BeanItem<Template> item = new BeanItem<Template>(justCreated);
         HIDDEN_FIELDS.forEach(f -> item.removeItemProperty(f));
+        Collection<Command> commands = service.getCommands(justCreated);
         return item;
     }
 
