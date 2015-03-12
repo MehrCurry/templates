@@ -31,6 +31,7 @@ public class TemplateView extends CustomComponent implements View {
     private CRUD<Template> crud=new CRUD<Template>(Template.class);
     private ButtonBar buttonBar;
     private final VerticalLayout left = new VerticalLayout();
+    private Button previewButton=new Button("Preview");
 
     @PostConstruct
     public void init() {
@@ -42,6 +43,7 @@ public class TemplateView extends CustomComponent implements View {
         mainLayout.addComponent(left);
         left.addComponent(new GenericBeanForm<Template>(Template.class));
         left.addComponent(crud);
+        left.addComponent(previewButton);
         setCompositionRoot(mainLayout);
     }
 

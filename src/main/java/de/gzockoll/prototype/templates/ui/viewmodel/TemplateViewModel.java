@@ -81,6 +81,7 @@ public class TemplateViewModel implements View, Action.Handler, SelectionEvent.S
         view.getCrud().addDatasourceForProperty("stationery", pdfContainer);
         view.getCrud().getAddButton().addClickListener(e -> selectTemplate(new Template()));
         view.getCrud().getDeleteButton().addClickListener(e -> { service.delete(selectedTemplate.getBean()); refresh();});
+        view.getPreviewButton().addClickListener(e -> showPDF(service.preview(selectedTemplate.getBean())));
     }
 
     private void commit(Button.ClickEvent e) {

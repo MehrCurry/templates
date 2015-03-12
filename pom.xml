@@ -21,8 +21,8 @@
 	<properties>
 		<start-class>de.gzockoll.prototype.templates.TemplatesApplication</start-class>
         <camel.version>[2.14.0,)</camel.version>
-        <pdfbox.version>2.0.0-SNAPSHOT</pdfbox.version>
-        <vaadin.version>7.4.0</vaadin.version>
+        <pdfbox.version>1.8.8</pdfbox.version>
+        <vaadin.version>7.4.1</vaadin.version>
         <project.source.version>1.8</project.source.version>
         <project.target.version>1.8</project.target.version>
         <project.encoding>UTF-8</project.encoding>

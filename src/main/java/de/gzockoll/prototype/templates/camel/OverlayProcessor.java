@@ -4,8 +4,8 @@ import com.google.common.io.ByteStreams;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.pdfbox.multipdf.Overlay;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.Overlay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ public class OverlayProcessor implements Processor {
         overlay.setInputPDF(inputDocument);
         overlay.setDefaultOverlayPDF(stationery);
         overlay.setOutputFile(out.getAbsolutePath());
-        overlay.overlay(Collections.EMPTY_MAP);
+        overlay.overlay(Collections.EMPTY_MAP,true);
 
         byte[] bytes= ByteStreams.toByteArray(new FileInputStream(out));
         out.delete();
