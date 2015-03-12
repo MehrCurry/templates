@@ -10,6 +10,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Arrays;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -71,6 +72,17 @@ public class ISOLanguageCodeValidatorTest {
         customer.validate();
     }
 
+    @Test
+    public void voidTestNullValue() {
+        NullIsValid entity = new NullIsValid();
+        assertThat(entity.isValid()).isTrue();
+
+        NullIsInValid another = new NullIsInValid();
+        assertThat(another.isValid()).isFalse();
+        another.setLanguage(Locale.getDefault().getLanguage());
+        assertThat(another.isValid()).isTrue();
+    }
+
     @Data
     private static class Customer extends AbstractEntity {
         @NotNull
@@ -80,6 +92,18 @@ public class ISOLanguageCodeValidatorTest {
         private String lastname;
 
         @ValidISOLanguageCode
+        private String language;
+    }
+
+    @Data
+    private static class NullIsValid extends AbstractEntity {
+        @ValidISOLanguageCode(allowNull = true)
+        private String language;
+    }
+
+    @Data
+    private static class NullIsInValid extends AbstractEntity {
+        @ValidISOLanguageCode(allowNull = false)
         private String language;
     }
 }

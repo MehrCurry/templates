@@ -88,6 +88,22 @@ public class TemplateService {
     }
 
     public Collection<Command> getCommands(Template t) {
+        return wrapCommandsWithServiceInvocation(t);
+    }
+
+    private Collection<Command> wrapCommandsWithServiceInvocation(Template t) {
         return t.commands().stream().map(c -> new Command(c.getName(), this, () -> this.execute(c))).collect(Collectors.toList());
+    }
+
+    public Collection<? extends Template> findAllTemplates() {
+        return repository.findAll();
+    }
+
+    public Template save(Template bean) {
+        return repository.save(bean);
+    }
+
+    public void delete(Template t) {
+        repository.delete(t);
     }
 }

@@ -33,6 +33,7 @@ public class AssetView extends CustomComponent implements View {
     @PostConstruct
     public void init() {
         VerticalLayout layout=new VerticalLayout();
+        layout.setMargin(true);
         layout.addComponent(time);
         layout.addComponent(upload);
         assetTable.addGeneratedColumn("Links", (table, itemId, columnId) -> {

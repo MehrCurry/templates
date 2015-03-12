@@ -5,14 +5,15 @@ import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.Action;
 import com.vaadin.ui.*;
 import de.gzockoll.prototype.templates.entity.AbstractEntity;
 import de.gzockoll.prototype.templates.entity.Template;
-import de.gzockoll.prototype.templates.util.Command;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -20,7 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Getter
 public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
     private final Class clazz;
-    private final Table table;
+    private  Grid grid;
     private Map<String, Field> fields=new HashMap<>();
     private BeanItemContainer<T> container;
     private Button commitButton=new Button("Speichern");
@@ -29,29 +30,27 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
     private Object item;
     private Map<String,Container> containerMap = new HashMap<>();
     private ButtonBar buttonBar=new ButtonBar(Collections.EMPTY_LIST);
+    private Button addButton=new Button("Add");
+    private Button deleteButton = new Button("Delete");
 
     public CRUD(Class clazz) {
         this.clazz=clazz;
 
         container=new BeanItemContainer<T>(clazz);
-        this.table=createTable(container);
-        setFirstComponent(table);
+        setFirstComponent(createTable(container));
     }
 
-    private Table createTable(BeanItemContainer<T> container) {
-        Table table=new Table(null,container);
-        table.setSelectable(true);
-        table.setSizeFull();
-        table.addValueChangeListener(e -> {
-            Table t= (Table) e.getProperty();
-            Object value = t.getValue();
-            BeanItem<Template> bt= (BeanItem<Template>) t.getContainerDataSource().getItem(value);
-            setItem(bt);
-            // Collection<Command<Template>> commands = bt.getBean().commands();
-            // Collection<Command<? extends Template>> hurz=commands;
-            //buttonBar.replaceCommands(commands);
-        });
-        return table;
+    private Component createTable(BeanItemContainer<T> container) {
+        VerticalLayout main=new VerticalLayout();
+        grid=new Grid(null,container);
+        grid.setSizeFull();
+        main.addComponent(grid);
+        HorizontalLayout buttons=new HorizontalLayout();
+        buttons.addComponent(addButton);
+        buttons.addComponent(deleteButton);
+        deleteButton.setEnabled(false);
+        main.addComponent(buttons);
+        return main;
     }
 
     private FormLayout createForm(Item item) {
@@ -82,7 +81,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
         }
     }
     public void setContainer(BeanItemContainer<T> container) {
-        table.setContainerDataSource(container);
+        grid.setContainerDataSource(container);
     }
 
     public void setItem(BeanItem<Template> item) {
@@ -100,19 +99,7 @@ public class CRUD<T extends AbstractEntity> extends HorizontalSplitPanel {
         return Optional.ofNullable(fields.get(property));
     }
 
-    public void addActionHandler(Action.Handler handler) {
-        table.addActionHandler(handler);
-    }
-
     public void addDatasourceForProperty(String key,Container container) {
         containerMap.put(key, container);
-    }
-
-    public T getBean() {
-        return (T) table.getValue();
-    }
-
-    public void addCommandButtons(Collection<Command<? extends AbstractEntity>> commands) {
-        // buttonBar.replaceCommands(commands);
     }
 }

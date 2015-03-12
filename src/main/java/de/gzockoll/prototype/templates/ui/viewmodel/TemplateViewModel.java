@@ -5,6 +5,7 @@ import com.google.common.net.MediaType;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.Action;
+import com.vaadin.event.SelectionEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.Resource;
@@ -13,13 +14,11 @@ import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import de.gzockoll.prototype.templates.control.AssetService;
 import de.gzockoll.prototype.templates.control.TemplateService;
 import de.gzockoll.prototype.templates.entity.Asset;
-import de.gzockoll.prototype.templates.entity.AssetRepository;
 import de.gzockoll.prototype.templates.entity.Template;
-import de.gzockoll.prototype.templates.entity.TemplateRepository;
 import de.gzockoll.prototype.templates.ui.components.CommandAction;
-import de.gzockoll.prototype.templates.ui.components.OnDemandStreamSource;
 import de.gzockoll.prototype.templates.ui.view.TemplateView;
 import de.gzockoll.prototype.templates.util.Command;
 import lombok.extern.slf4j.Slf4j;
@@ -29,16 +28,16 @@ import org.vaadin.spring.annotation.VaadinUIScope;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Optional;
 
 import static de.gzockoll.prototype.templates.ui.util.ErrorHandler.handleError;
 
 @Component
 @VaadinUIScope
 @Slf4j
-public class TemplateViewModel implements View, OnDemandStreamSource, Action.Handler {
+public class TemplateViewModel implements View, Action.Handler, SelectionEvent.SelectionListener {
     private static final Action ACTION_ADD = new Action("Add");
     private static final Action ACTION_DELETE = new Action("Delete");
     private static final Action ACTION_PREVIEW = new Action("Preview");
@@ -48,21 +47,19 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
     public static final ImmutableSet<String> HIDDEN_FIELDS = ImmutableSet.of("id", "version", "valid", "approved");
 
     @Autowired
-    private TemplateRepository repository;
-
-    @Autowired
-    private AssetRepository assetRepository;
-
-    @Autowired
     private TemplateView view;
 
     @Autowired
     private TemplateService service;
 
-    private BeanItemContainer<Template> templateContainer = new BeanItemContainer<Template>(Template.class);
-    private BeanItemContainer<Asset> xslContainer = new BeanItemContainer<Asset>(Asset.class);
-    private BeanItemContainer<Asset> pdfContainer = new BeanItemContainer<Asset>(Asset.class);
+    @Autowired
+    private AssetService assetService;
 
+    private BeanItemContainer<Template> templateContainer = new BeanItemContainer<>(Template.class);
+    private BeanItemContainer<Asset> xslContainer = new BeanItemContainer<>(Asset.class);
+    private BeanItemContainer<Asset> pdfContainer = new BeanItemContainer<>(Asset.class);
+
+    private BeanItem<Template> selectedTemplate=new BeanItem<Template>(new Template());
     @PostConstruct
     public void init() {
         bind();
@@ -70,30 +67,38 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
 
     public void bind() {
         view.setViewChangeListener(this);
+        HIDDEN_FIELDS.forEach(f -> view.getCrud().getGrid().removeColumn(f));
         templateContainer.removeAllItems();
-        templateContainer.addAll(repository.findAll());
+        templateContainer.addAll(service.findAllTemplates());
         HIDDEN_FIELDS.forEach(p -> templateContainer.removeContainerProperty(p));
-        xslContainer.addAll(assetRepository.findByMimeType("application/xslt+xml"));
-        pdfContainer.addAll(assetRepository.findByMimeType("application/pdf"));
-        view.getStreamSource().setDelegate(this);
-        view.setContainer(templateContainer);
-        view.addActionHandler(this);
-        view.addCommitClickHandler(e -> commit(e));
-        view.addDatasourceForProperty("transform",xslContainer);
-        view.addDatasourceForProperty("stationery", pdfContainer);
+        xslContainer.addAll(assetService.findByMimeType("application/xslt+xml"));
+        pdfContainer.addAll(assetService.findByMimeType("application/pdf"));
+        view.getCrud().setContainer(templateContainer);
+        // view.getCrud().addActionHandler(this);
+        view.getCrud().getCommitButton().addClickListener(e -> commit(e));
+        view.getCrud().getGrid().addSelectionListener(this);
+        view.getCrud().addDatasourceForProperty("transform", xslContainer);
+        view.getCrud().addDatasourceForProperty("stationery", pdfContainer);
+        view.getCrud().getAddButton().addClickListener(e -> selectTemplate(new Template()));
+        view.getCrud().getDeleteButton().addClickListener(e -> { service.delete(selectedTemplate.getBean()); refresh();});
     }
 
     private void commit(Button.ClickEvent e) {
         try {
-            view.commit();
-            BeanItem<Template> item = (BeanItem<Template>) view.getCurrentItem();
-            Template newBean = repository.save(item.getBean());
+            view.getCrud().commit();
+            Template newBean = service.save(selectedTemplate.getBean());
             refresh();
-            view.setItem(templateContainer.getItem(newBean));
+            selectTemplate(new Template());
             view.addCommandButtons(service.getCommands(newBean));
         } catch (IllegalStateException ex) {
             handleError(ex);
         }
+    }
+
+    private void selectTemplate(Template template) {
+        selectedTemplate=new BeanItem<Template>(template);
+        HIDDEN_FIELDS.forEach(f -> selectedTemplate.removeItemProperty(f));
+        view.getCrud().setItem(selectedTemplate);
     }
 
     public View getView() {
@@ -107,24 +112,12 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
 
     private void refresh() {
         templateContainer.removeAllItems();
-        templateContainer.addAll(repository.findAll());
+        templateContainer.addAll(service.findAllTemplates());
         HIDDEN_FIELDS.forEach(p -> templateContainer.removeContainerProperty(p));
         xslContainer.removeAllItems();
-        xslContainer.addAll(assetRepository.findByMimeType(MIME_TYPE_XSLT));
+        xslContainer.addAll(assetService.findByMimeType(MIME_TYPE_XSLT));
         pdfContainer.removeAllItems();
-        pdfContainer.addAll(assetRepository.findByMimeType(MIME_TYPE_PDF));
-    }
-
-    @Override
-    public String getFilename() {
-        return "preview.pdf";
-    }
-
-    @Override
-    public InputStream getStream() {
-        Template t = view.getBean();
-        byte[] data = service.preview((String) view.getEditor().getValue(), t.getStationery());
-        return new ByteArrayInputStream(data);
+        pdfContainer.addAll(assetService.findByMimeType(MIME_TYPE_PDF));
     }
 
     @Override
@@ -132,12 +125,11 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
         return new Action[] {
                 new CommandAction<Template>("Add", (s,t) -> {
                     Template justCreated = new Template();
-                    final BeanItem<Template> item = getTemplateBeanItem(justCreated);
-                    view.editItem(item);
+                    selectTemplate(justCreated);
                 }),
                 new CommandAction<Template>("Delete", (s,t) -> {
                     if (target!=null) {
-                        repository.delete(t);
+                        service.delete(t);
                         templateContainer.removeItem(t);
                     }
                 }),
@@ -169,5 +161,13 @@ public class TemplateViewModel implements View, OnDemandStreamSource, Action.Han
         subWindow.setHeight("100%");
         subWindow.setContent(frame);
         UI.getCurrent().addWindow(subWindow);
+    }
+
+
+    @Override
+    public void select(SelectionEvent event) {
+        final Optional<Object> selected = event.getSelected().stream().findFirst();
+        selected.ifPresent(o -> selectTemplate(templateContainer.getItem(o).getBean()));
+        view.getCrud().getDeleteButton().setEnabled(selected.isPresent());
     }
 }

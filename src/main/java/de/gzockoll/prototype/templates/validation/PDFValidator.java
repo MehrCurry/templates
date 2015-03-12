@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Locale;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 @Slf4j
 public class PDFValidator implements ConstraintValidator<PDFDocument,Asset> {
     public static final HashSet<String> VALID_LANGUAGES = Sets.newHashSet(Locale.getISOLanguages());
@@ -24,7 +22,9 @@ public class PDFValidator implements ConstraintValidator<PDFDocument,Asset> {
 
     @Override
     public boolean isValid(Asset asset, ConstraintValidatorContext constraintValidatorContext) {
-        checkArgument(asset!=null);
+        if (asset==null) {
+            return false;
+        }
         try {
             PDDocument doc=PDDocument.load(asset.asByteStream());
             return doc!=null;
