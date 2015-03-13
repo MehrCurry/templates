@@ -11,6 +11,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import de.gzockoll.prototype.templates.entity.AssetRepository;
 import de.gzockoll.prototype.templates.ui.converter.ConverterFactory;
 import de.gzockoll.prototype.templates.ui.viewmodel.AssetViewModel;
+import de.gzockoll.prototype.templates.ui.viewmodel.EditViewModel;
 import de.gzockoll.prototype.templates.ui.viewmodel.TemplateViewModel;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class MainUI extends UI {
 
     @Autowired
     private TemplateViewModel templateViewModel;
+
+    @Autowired
+    private EditViewModel editViewModel;
 
     ValoMenuLayout root = new ValoMenuLayout();
     ComponentContainer viewDisplay = root.getContentContainer();
@@ -74,6 +78,7 @@ public class MainUI extends UI {
         navigator = new Navigator(this, viewDisplay);
         navigator.addView("assets", assetViewModel.getAssetView());
         navigator.addView("templates", templateViewModel.getView());
+        navigator.addView("edit", editViewModel.getView());
 
         final String f = Page.getCurrent().getUriFragment();
         if (StringUtils.isEmpty(f)) {
@@ -120,6 +125,7 @@ public class MainUI extends UI {
         // Add items
         menuItems.put("assets", MenuEntry.of("Assets", FontAwesome.UPLOAD));
         menuItems.put("templates", MenuEntry.of("Templates", FontAwesome.FILE_CODE_O));
+        menuItems.put("edit", MenuEntry.of("Edit", FontAwesome.PENCIL_SQUARE_O));
 
         final HorizontalLayout top = new HorizontalLayout();
         top.setWidth("100%");
