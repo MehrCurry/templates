@@ -12,6 +12,7 @@ import de.gzockoll.prototype.templates.entity.AssetRepository;
 import de.gzockoll.prototype.templates.ui.converter.ConverterFactory;
 import de.gzockoll.prototype.templates.ui.viewmodel.AssetViewModel;
 import de.gzockoll.prototype.templates.ui.viewmodel.EditViewModel;
+import de.gzockoll.prototype.templates.ui.viewmodel.JiraViewModel;
 import de.gzockoll.prototype.templates.ui.viewmodel.TemplateViewModel;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class MainUI extends UI {
 
     @Autowired
     private EditViewModel editViewModel;
+
+    @Autowired
+    private JiraViewModel jiraViewModel;
 
     ValoMenuLayout root = new ValoMenuLayout();
     ComponentContainer viewDisplay = root.getContentContainer();
@@ -79,6 +83,7 @@ public class MainUI extends UI {
         navigator.addView("assets", assetViewModel.getAssetView());
         navigator.addView("templates", templateViewModel.getView());
         navigator.addView("edit", editViewModel.getView());
+        navigator.addView("jira", jiraViewModel.getView());
 
         final String f = Page.getCurrent().getUriFragment();
         if (StringUtils.isEmpty(f)) {
@@ -126,6 +131,7 @@ public class MainUI extends UI {
         menuItems.put("assets", MenuEntry.of("Assets", FontAwesome.UPLOAD));
         menuItems.put("templates", MenuEntry.of("Templates", FontAwesome.FILE_CODE_O));
         menuItems.put("edit", MenuEntry.of("Edit", FontAwesome.PENCIL_SQUARE_O));
+        menuItems.put("jira", MenuEntry.of("Jira", FontAwesome.TABLE));
 
         final HorizontalLayout top = new HorizontalLayout();
         top.setWidth("100%");
